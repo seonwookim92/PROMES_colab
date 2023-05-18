@@ -64,53 +64,53 @@ class Net5_(Net5):
 class DQN(nn.Module):
     def __init__(self, pretrained=True, freeze=True):
         super(DQN, self).__init__()
-        # self.net5_ = Net5_()
-        self.net5 = Net5()
+        self.net5_ = Net5_()
+        # self.net5 = Net5()
 
         if pretrained:
             # Load pretrained weights
             net5_state_dict = torch.load(os.path.join(base_path, "kube_mm_scheduler", "weight", "net5.pt"))
-            # net5_state_dict.pop('fc3_1.weight')
-            # net5_state_dict.pop('fc3_1.bias')
-            # net5_state_dict.pop('fc3_2.weight')
-            # net5_state_dict.pop('fc3_2.bias')
-            # net5_state_dict.pop('fc3_3.weight')
-            # net5_state_dict.pop('fc3_3.bias')
-            # net5_state_dict.pop('fc3_4.weight')
-            # net5_state_dict.pop('fc3_4.bias')
-            # net5_state_dict.pop('fc3_5.weight')
-            # net5_state_dict.pop('fc3_5.bias')
-            # self.net5_.load_state_dict(net5_state_dict)
-            self.net5.load_state_dict(net5_state_dict)
+            net5_state_dict.pop('fc3_1.weight')
+            net5_state_dict.pop('fc3_1.bias')
+            net5_state_dict.pop('fc3_2.weight')
+            net5_state_dict.pop('fc3_2.bias')
+            net5_state_dict.pop('fc3_3.weight')
+            net5_state_dict.pop('fc3_3.bias')
+            net5_state_dict.pop('fc3_4.weight')
+            net5_state_dict.pop('fc3_4.bias')
+            net5_state_dict.pop('fc3_5.weight')
+            net5_state_dict.pop('fc3_5.bias')
+            self.net5_.load_state_dict(net5_state_dict)
+            # self.net5.load_state_dict(net5_state_dict)
 
         if freeze:
             # Freeze net5
-            # for param in self.net5_.parameters():
-            for param in self.net5.parameters():
+            for param in self.net5_.parameters():
+            # for param in self.net5.parameters():
                 param.requires_grad = False
         else:
             # Unfreeze net5
-            # for param in self.net5_.parameters():
-            for param in self.net5.parameters():
+            for param in self.net5_.parameters():
+            # for param in self.net5.parameters():
                 param.requires_grad = True
 
         # self.fc4 = nn.Linear(5, 16)        
         # self.fc5 = nn.Linear(16, 6)
 
-        self.fc4 = nn.Linear(5, 6)
+        # self.fc4 = nn.Linear(5, 6)
         
-        # self.fc3 = nn.Linear(80, 20)
-        # self.fc4 = nn.Linear(20, 6)
+        self.fc3 = nn.Linear(80, 20)
+        self.fc4 = nn.Linear(20, 6)
 
     def forward(self, x1, x2):
-        # x = self.net5_(x1, x2)
-        x = self.net5(x1, x2)
+        x = self.net5_(x1, x2)
+        # x = self.net5(x1, x2)
 
         # x = F.relu(self.fc4(x))
         # x = self.fc5(x)
         
-        x = self.fc4(x)
-
-        # x = F.relu(self.fc3(x))
         # x = self.fc4(x)
+
+        x = F.relu(self.fc3(x))
+        x = self.fc4(x)
         return x
