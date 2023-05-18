@@ -1,6 +1,6 @@
 import os, sys
 
-base_path = os.path.join(os.getcwd(), "..")
+base_path = os.path.join(os.getcwd())
 print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 
