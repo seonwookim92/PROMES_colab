@@ -24,8 +24,8 @@ class Net1(nn.Module):
             for param in self.parameters():
                 param.requires_grad = False
         else:
-            # Unfreeze net5
-            for param in self.net5.parameters():
+            # Unfreeze
+            for param in self.parameters():
                 param.requires_grad = True
 
     def forward(self, x1, x2):
