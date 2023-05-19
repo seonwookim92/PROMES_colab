@@ -8,7 +8,7 @@ print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 
 class Net3(nn.Module):
-    def __init__(self, pretrained, freeze):
+    def __init__(self, pretrained=False, freeze=False):
         super(Net3, self).__init__()
         self.fc1_1 = nn.Linear(10, 16) # 5 Nodes status (CPU, Memory)
         self.fc1_2 = nn.Linear(2, 16)   # Pod quota (CPU, Memory)
