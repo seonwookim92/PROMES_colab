@@ -94,23 +94,35 @@ class DQN(nn.Module):
             # for param in self.net5.parameters():
                 param.requires_grad = True
 
+        # Original
         # self.fc4 = nn.Linear(5, 16)        
         # self.fc5 = nn.Linear(16, 6)
 
+        # Simplified
         # self.fc4 = nn.Linear(5, 6)
         
-        self.fc3 = nn.Linear(80, 20)
-        self.fc4 = nn.Linear(20, 6)        
+        # More complex
+        self.fc3 = nn.Linear(80, 64)
+        self.fc4 = nn.Linear(64, 32)
+        self.fc5 = nn.Linear(32, 16)
+        self.fc6 = nn.Linear(16, 6)
+
 
     def forward(self, x1, x2):
         x = self.net5_(x1, x2)
         # x = self.net5(x1, x2)
-
-        # x = F.relu(self.fc4(x))
-        # x = self.fc5(x)
         
+        # Simplified
         # x = self.fc4(x)
 
+        # Original
+        # x = F.relu(self.fc3(x))
+        # x = self.fc4(x)
+
+        # More complex
         x = F.relu(self.fc3(x))
-        x = self.fc4(x)
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = self.fc6(x)
+        
         return x
