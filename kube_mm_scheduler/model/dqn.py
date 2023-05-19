@@ -100,7 +100,7 @@ class DQN(nn.Module):
         # self.fc4 = nn.Linear(5, 6)
         
         self.fc3 = nn.Linear(80, 20)
-        self.fc4 = nn.Linear(20, 6)
+        self.fc4 = nn.Linear(20, 6)        
 
     def forward(self, x1, x2):
         x = self.net5_(x1, x2)

@@ -16,7 +16,8 @@ class Net1(nn.Module):
 
         if pretrained:
             # Load pretrained weights
-            self.load_state_dict(os.path.join(base_path, "kube_mm_scheduler", "weight", "net1.pt"))
+            net1_state_dict = torch.load(os.path.join(base_path, "kube_mm_scheduler", "weight", "net1.pt"))
+            self.load_state_dict(net1_state_dict)
 
         if freeze:
             # Freeze those weights
