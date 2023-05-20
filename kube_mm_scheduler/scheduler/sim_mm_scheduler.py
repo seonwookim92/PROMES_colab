@@ -12,8 +12,8 @@ class SimMmScheduler:
         model_path = os.path.join("kube_mm_scheduler", "model", model).replace("/", ".")
         weight_path = os.path.join(base_path, "kube_mm_scheduler", "weight", f"{model}.pt") #.replace("/", ".")
 
-        self.model = importlib.import_module(model_path).Model()
-        self.model.load_state_dict(torch.load(weight_path))
+        self.model = importlib.import_module(model_path).Model(True, True)
+        # self.model.load_state_dict(torch.load(weight_path))
 
         self.model.eval()
 

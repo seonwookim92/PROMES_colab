@@ -13,7 +13,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from kube_sim_gym.envs.sim_kube_env import SimKubeEnv
 
-from_class = uic.loadUiType('KubeSimGui.ui')[0]
+from_class = uic.loadUiType(os.path.join(base_path, 'kube_simulator_gui', 'KubeSimGui.ui'))[0]
 
 class KubeSimGui(QMainWindow, from_class):
     def __init__(self):
