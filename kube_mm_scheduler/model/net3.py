@@ -10,7 +10,7 @@ print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 
 class Model(nn.Module):
-    def __init__(self, pretrained=False, freeze=False):
+    def __init__(self, pretrained=False, freeze=False, weight=None):
         super(Model, self).__init__()
         self.fc1_1 = nn.Linear(10, 16) # 5 Nodes status (CPU, Memory)
         self.fc1_2 = nn.Linear(2, 16)   # Pod quota (CPU, Memory)
@@ -20,7 +20,10 @@ class Model(nn.Module):
 
         if pretrained:
             # Load pretrained weights
-            self.load_state_dict(torch.load(os.path.join(base_path, "kube_mm_scheduler", "weight", "net3.pt")))
+            if weight is None:
+                self.load_state_dict(torch.load(os.path.join(base_path, "kube_mm_scheduler", "weight", "net3.pt")))
+            else:
+                self.load_state_dict(torch.load(os.path.join(base_path, "kube_mm_scheduler", "weight", weight)))
 
         if freeze:
             # Freeze those weights

@@ -9,8 +9,8 @@ sys.path.append(base_path)
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from kube_mm_scheduler.model.net3 import Net3
-from kube_mm_scheduler.model.net5 import Net5
+from kube_mm_scheduler.model.net3 import Model as Net3
+from kube_mm_scheduler.model.net5 import Model as Net5
 
 class Net3_(Net3):
     def __init__(self):
@@ -63,9 +63,9 @@ class Net5_(Net5):
 
 # DQN model
 # Based on net5, make a DQN model outputting 6 possible actions' Q-values
-class DQN(nn.Module):
+class Model(nn.Module):
     def __init__(self, pretrained=True, freeze=True):
-        super(DQN, self).__init__()
+        super(Model, self).__init__()
         self.net5_ = Net5_()
         # self.net5 = Net5()
 
