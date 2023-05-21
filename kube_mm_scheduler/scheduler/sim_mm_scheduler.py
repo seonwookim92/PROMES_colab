@@ -7,7 +7,7 @@ base_path = os.path.join(os.path.dirname(__file__), "..", "..")
 sys.path.append(base_path)
 
 class SimMmScheduler:
-    def __init__(self, model='net5'):
+    def __init__(self, model='promes'):
 
         model_path = os.path.join("kube_mm_scheduler", "model", model).replace("/", ".")
         weight_path = os.path.join(base_path, "kube_mm_scheduler", "weight", f"{model}.pt") #.replace("/", ".")

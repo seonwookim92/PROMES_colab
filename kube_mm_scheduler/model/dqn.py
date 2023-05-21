@@ -1,6 +1,8 @@
 import os, sys
 
 base_path = os.getcwd()
+if base_path.split('/')[-1] != 'PROMES_colab':
+    base_path = os.path.join(base_path, '..')
 print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 

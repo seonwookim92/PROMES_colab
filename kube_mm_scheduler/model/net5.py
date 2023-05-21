@@ -7,7 +7,7 @@ sys.path.append(base_path)
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from kube_mm_scheduler.model.net3 import Net3
+from kube_mm_scheduler.model.net3 import Model as Net3
 
 
 
@@ -47,9 +47,9 @@ class Net3_(Net3):
 # Reuse Net4 to process input1 and input2
 # We will take 5 nodes' state which is same as input3
 # And will concatenate each output with the output from Net3_
-class Net5(nn.Module):
+class Model(nn.Module):
     def __init__(self):
-        super(Net5, self).__init__()
+        super(Model, self).__init__()
         self.net3_ = Net3_()
 
         self.fc1_3_1 = nn.Linear(2, 16)   # Node1 state (CPU, Memory)

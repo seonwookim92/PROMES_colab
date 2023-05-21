@@ -1,14 +1,16 @@
 import os, sys
 
 base_path = os.getcwd()
+if base_path.split('/')[-1] != 'PROMES_colab':
+    base_path = os.path.join(base_path, '..')
 print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from kube_mm_scheduler.model.net3 import Net3
-from kube_mm_scheduler.model.net5 import Net5
+from kube_mm_scheduler.model.net3 import Model as Net3
+from kube_mm_scheduler.model.net5 import Model as Net5
 
 class Net3_(Net3):
     def __init__(self):
