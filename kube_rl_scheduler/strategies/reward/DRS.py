@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_reward(cluster, action, is_scheduled, time, debug=False):
+def get_reward(env, cluster, action, is_scheduled, time, debug=False):
 
     util = {}
     for node in cluster.nodes:

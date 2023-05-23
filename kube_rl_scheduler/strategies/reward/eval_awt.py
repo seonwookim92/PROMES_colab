@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_reward(cluster, action, is_scheduled, time, debug=False):
+def get_reward(env, cluster, action, is_scheduled, time, debug=False):
 
     # Accumulative delay of scheduling
     # If there are no pending pods, return 0

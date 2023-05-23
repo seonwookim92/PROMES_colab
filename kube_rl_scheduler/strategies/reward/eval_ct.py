@@ -1,6 +1,6 @@
 import numpy as np
 
-def get_reward(cluster, action, is_scheduled, time, debug=False):
+def get_reward(env, cluster, action, is_scheduled, time, debug=False):
 
     # Return completion time of the pod
     # Just returns the time from 0

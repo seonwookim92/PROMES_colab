@@ -11,10 +11,8 @@ from kube_sim_gym.components.cluster import Cluster
 from kube_sim_gym.components.pod import Pod
 from kube_sim_gym.utils.sim_stress_gen import SimStressGen
 
-from kube_sim_gym.envs.sim_kube_env_copy import SimKubeEnvCopy
-
 # Simulate kubernetes node and pods with cpu, memory resources
-class SimKubeEnv(gym.Env):
+class SimKubeEnvCopy(gym.Env):
     def __init__(self, reward_file="try.py", scenario_file="trace2017_1.csv", n_node=5, cpu_pool=50000, mem_pool=50000, debug=None):
         # self.debug = True if debug == None else debug
         self.debug = False
@@ -39,8 +37,6 @@ class SimKubeEnv(gym.Env):
         self.done = False
         self.observation_space = gym.spaces.Box(low=0, high=100, shape=(n_node * 2 + 2,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(n_node + 1)
-        # Action space as box
-        # self.action_space = gym.spaces.Box(low=0, high=n_node, shape=(1,), dtype=np.float32)
 
         self.action_map = {'0': 'standby'}
         for i in range(n_node):
@@ -54,71 +50,9 @@ class SimKubeEnv(gym.Env):
         reward_module_path = os.path.join(f"kube_{self.scheduler_type}_scheduler", "strategies", "reward", self.reward_fn_name).replace('/', '.')
         self.reward_fn = importlib.import_module(reward_module_path)
 
-    def duplicate(self):
-        # Copy the class ifself, but should be separated from the original one
-        # This is to prevent the original one from being modified
-        from copy import deepcopy
-
-        new_env = SimKubeEnvCopy(self.reward_file, self.scenario_file, self.n_node, self.cpu_pool, self.mem_pool, self.debug)
-        new_env.cluster = deepcopy(self.cluster)
-
-        return new_env
-
-
-    def random_state_gen(self):
-        """
-        This is a extra function to generate random state for data generation.\n
-        Do not use it in normal situation, it will screw up the cluster.
-        """
-        no_pod_thres = 0.8
-        no_pod_prob = np.random.random()
-        # Randomly generate state
-        # Node state can be in range 0 to 1 (rounded to 2 decimal places)
-        cpu_pool = self.cluster.nodes[0].spec['cpu_pool']
-        mem_pool = self.cluster.nodes[0].spec['mem_pool']
-
-        state = []
-        for node in self.cluster.nodes:
-            node_cpu_ratio = round(np.random.uniform(0, 1), 2)
-            node_mem_ratio = round(np.random.uniform(0, 1), 2)
-            state += [node_cpu_ratio, node_mem_ratio]
-
-        # Pending pod state can be in range 0 to 1 (rounded to 2 decimal places)
-        if no_pod_prob < no_pod_thres:
-            pending_pod_cpu_ratio = round(np.random.uniform(0, 0.5), 2)
-            pending_pod_mem_ratio = round(np.random.uniform(0, 0.5), 2)
-            state += [pending_pod_cpu_ratio, pending_pod_mem_ratio]
-        else:
-            state += [0, 0]
-        
-        # Update cluster
-        self.reset()
-
-        for i in range(self.n_node):
-            self.cluster.nodes[i].status['cpu_ratio'] = state[i * 2]
-            self.cluster.nodes[i].status['mem_ratio'] = state[i * 2 + 1]
-            self.cluster.nodes[i].status['cpu_util'] = state[i * 2] * cpu_pool
-            self.cluster.nodes[i].status['mem_util'] = state[i * 2 + 1] * mem_pool
-
-        self.cluster.pending_pods = []
-
-        if no_pod_prob < no_pod_thres:
-            cpu_quota = state[self.n_node * 2] # * cpu_pool
-            mem_quota = state[self.n_node * 2 + 1] # * mem_pool
-
-            pod = Pod([0, 0, 0, cpu_quota, mem_quota], {"cpu_pool":cpu_pool, "mem_pool":mem_pool}, self.debug)
-
-            self.cluster.pending_pods.append(pod)
-
-        return np.array(state, dtype=np.float32)
-
-
-
     def get_reward(self, cluster, action, is_scheduled, time):
 
-        env_prev = self.duplicate()
-
-        reward = self.reward_fn.get_reward(env_prev, cluster, action, is_scheduled, time, self.debug)
+        reward = self.reward_fn.reward_helper(cluster, action, is_scheduled, time, self.debug)
 
         return reward
 
