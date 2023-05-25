@@ -174,6 +174,9 @@ def reward_helper(cluster, action, info, time, debug=False):
     rbd2 = round(rbd2, 4)
     pwd = round(pwd, 4)
 
+    # Temporary!! : Ignore pwd
+    pwd = 0
+
     # reward = w1 * rur + w2 * rbd1 + w3 * rbd2 + w4 * pwd # + w5 * prg
     _reward = rur + rbd1 + rbd2 + pwd # + prg
 

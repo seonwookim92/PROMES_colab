@@ -32,7 +32,7 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     w1 = 1
     w2 = 3
     w3 = 3
-    w4 = 1
+    # w4 = 1
 
     util = {}
     for node in cluster.nodes:
@@ -72,26 +72,26 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     rbd2 = - rbd2
  
     # pwd = Penalty for the wrong decision (-5 for wrong decision, 0 for correct decision)
-    avail_nodes = get_available_nodes(cluster)
+    # avail_nodes = get_available_nodes(cluster)
  
-    if info is not None:
-        if action != 0 and info['is_scheduled'] == False and info['last_pod'] != None: # 만석입니다.
-            pwd = -5
-        elif action != 0 and info['is_scheduled'] == False and info['last_pod'] == None: # 헛발질
-            pwd = -5
-        elif action == 0 and info['is_scheduled'] is None and info['last_pod'] == None: # 기다릴 때를 알아야
-            pwd = 5
-        elif action == 0 and avail_nodes == [0]: # 기다릴 때를 알아야
-            pwd = 5
-        elif action == 0 and info['is_scheduled'] is None and info['last_pod'] != None: # 왜 가만히 있니
-            pwd = -5
-        else: # 정상
-            pwd = 0
-    else:
-        pwd = 0
+    # if info is not None:
+    #     if action != 0 and info['is_scheduled'] == False and info['last_pod'] != None: # 만석입니다.
+    #         pwd = -5
+    #     elif action != 0 and info['is_scheduled'] == False and info['last_pod'] == None: # 헛발질
+    #         pwd = -5
+    #     elif action == 0 and info['is_scheduled'] is None and info['last_pod'] == None: # 기다릴 때를 알아야
+    #         pwd = 5
+    #     elif action == 0 and avail_nodes == [0]: # 기다릴 때를 알아야
+    #         pwd = 5
+    #     elif action == 0 and info['is_scheduled'] is None and info['last_pod'] != None: # 왜 가만히 있니
+    #         pwd = -5
+    #     else: # 정상
+    #         pwd = 0
+    # else:
+    #     pwd = 0
 
     # Calculate reward
-    reward = w1 * rur + w2 * rbd1 + w3 * rbd2 + w4 * pwd
+    reward = w1 * rur + w2 * rbd1 + w3 * rbd2 #+ w4 * pwd
 
     # print(f"Reward details...\n\tRUR: {rur}\n\tRBD1: {rbd1}\n\tRBD2: {rbd2}\n\tPWD: {pwd}\n==========\nSUM> {reward}")
 
