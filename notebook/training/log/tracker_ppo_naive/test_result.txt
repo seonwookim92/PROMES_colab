@@ -1,0 +1,24 @@
+Test result after 0th training
+- reward : -739.6700000000017 vs. 228.04999999999944
+- step : 1280 vs. 1108
+
+Test result after 1th training
+- reward : -204.60000000000005 vs. 248.74999999999963
+- step : 1184 vs. 1105
+
+Test result after 1th training
+- reward : -228.39999999999998 vs. 256.03999999999985
+- step : 1180 vs. 1105
+
+Test result after 2th training
+- reward : -8.800000000000036 vs. 248.69000000000065
+- step : 1150 vs. 1106
+
+Test result after 3th training
+- reward : 57.69000000000011 vs. 227.96000000000006
+- step : 1143 vs. 1107
+
+Test result after 4th training
+- reward : 27.339999999999808 vs. 245.05000000000035
+- step : 1146 vs. 1106
+

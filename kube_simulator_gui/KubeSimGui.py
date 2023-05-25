@@ -36,6 +36,7 @@ class KubeSimGui(QMainWindow, from_class):
 
         # Fetch Scenarios from {base_path}/scenarios/
         self.scenarios_path = glob.glob(os.path.join(base_path, 'scenarios', '*.csv'))
+        self.scenarios_path += glob.glob(os.path.join(base_path, 'scenarios', 'trace2017', '*.csv'))
         self.scenarios_fname = [os.path.basename(scenario_path) for scenario_path in self.scenarios_path]
         self.scenario_ComboBox.addItems(['Select Scenario'] + self.scenarios_fname)
 
@@ -175,7 +176,9 @@ class KubeSimGui(QMainWindow, from_class):
             return
         self.action = self.nextAction
         self.state, self.reward, self.done, self.info = self.env.step(self.action)
-        self.reward_acc += self.reward
+        # If just started, do not update reward_acc
+        if self.env.time != 0:
+            self.reward_acc += self.reward
         self.update_all()
 
     def btn_tenstep(self):
@@ -317,7 +320,7 @@ class KubeSimGui(QMainWindow, from_class):
         self.settings_Area.setPlainText(settings)
 
     def update_info(self):
-        text = f"""state: {self.env.get_state()}\naction: {self.action}\nreward: {round(self.env.reward, 2)}\nreward(acc): {round(self.reward_acc, 2)}\ndone: {self.env.get_done()}"""
+        text = f"""state: {self.env.get_state()}\naction: {self.action}\nreward: {round(self.env.reward, 2)}\nreward(acc): {round(self.reward_acc, 2)}\ndone: {self.env.get_done()}\nis_scheduled: {self.info['is_scheduled'] if self.info is not None else "False"}"""
         self.info_Area.setPlainText(text)
 
     def update_progressBar(self):

@@ -50,9 +50,9 @@ class SimKubeEnvCopy(gym.Env):
         reward_module_path = os.path.join(f"kube_{self.scheduler_type}_scheduler", "strategies", "reward", self.reward_fn_name).replace('/', '.')
         self.reward_fn = importlib.import_module(reward_module_path)
 
-    def get_reward(self, cluster, action, is_scheduled, time):
+    def get_reward(self, cluster, action, info, time):
 
-        reward = self.reward_fn.reward_helper(cluster, action, is_scheduled, time, self.debug)
+        reward = self.reward_fn.reward_helper(cluster, action, info, time, self.debug)
 
         return reward
 
@@ -109,6 +109,9 @@ class SimKubeEnvCopy(gym.Env):
         pending_pods = self.cluster.pending_pods
 
         if pending_pods:
+
+            pending_pod = pending_pods[0]
+
             try:
                 deploy_node = self.cluster.get_node(self.action_map[str(action)])
             except:
@@ -116,7 +119,7 @@ class SimKubeEnvCopy(gym.Env):
             if deploy_node:
                 if self.debug:
                     print(f"(SimKubeEnv) Deploying pod to node {deploy_node.node_name}")
-                pending_pod = pending_pods[0]
+                
                 is_scheduled = self.cluster.deploy_pod(pending_pod, deploy_node, self.time)
                 if is_scheduled:
                     if self.debug:
@@ -134,12 +137,20 @@ class SimKubeEnvCopy(gym.Env):
             else:
                 if self.debug:
                     print(f"(SimKubeEnv) Standby")
+                self.info = {
+                    'last_pod' : pending_pod, # None
+                    'is_scheduled' : None # None
+                }
         else:
             if self.debug:
                 print(f"(SimKubeEnv) No pending pods")
+            self.info = {
+                'last_pod' : None, # None
+                'is_scheduled' : False # False
+            }
 
         # Get reward
-        self.reward = self.get_reward(self.cluster, action, is_scheduled, self.time)
+        self.reward = self.get_reward(self.cluster, action, self.info, self.time)
 
         # Get state
         state = self.get_state()

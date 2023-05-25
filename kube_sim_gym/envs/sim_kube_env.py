@@ -15,7 +15,7 @@ from kube_sim_gym.envs.sim_kube_env_copy import SimKubeEnvCopy
 
 # Simulate kubernetes node and pods with cpu, memory resources
 class SimKubeEnv(gym.Env):
-    def __init__(self, reward_file="try.py", scenario_file="trace2017_1.csv", n_node=5, cpu_pool=50000, mem_pool=50000, debug=None):
+    def __init__(self, reward_file="try.py", scenario_file="trace2017_100_1.csv", n_node=5, cpu_pool=50000, mem_pool=50000, debug=None):
         # self.debug = True if debug == None else debug
         self.debug = False
 
@@ -23,7 +23,7 @@ class SimKubeEnv(gym.Env):
         self.reward_file = reward_file
         self.reward_fn_name = os.path.splitext(self.reward_file)[0]
 
-        self.scenario_file = scenario_file
+        self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017') else scenario_file
         self.stress_gen = SimStressGen(self.scenario_file, self.debug)
         
         self.n_node = n_node
@@ -114,11 +114,9 @@ class SimKubeEnv(gym.Env):
 
 
 
-    def get_reward(self, cluster, action, is_scheduled, time):
+    def get_reward(self, env_prev, cluster, action, info, time):
 
-        env_prev = self.duplicate()
-
-        reward = self.reward_fn.get_reward(env_prev, cluster, action, is_scheduled, time, self.debug)
+        reward = self.reward_fn.get_reward(env_prev, cluster, action, info, time, self.debug)
 
         return reward
 
@@ -153,13 +151,16 @@ class SimKubeEnv(gym.Env):
         return self.done
 
     def step(self, action):
-        self.time += 1
-        is_scheduled = None
+
+        env_prev = self.duplicate()
+
+        # self.time += 1
+        # is_scheduled = None
         
-        new_pod_spec = self.stress_gen.create_pod(self.time)
-        node_spec = self.cluster.nodes[0].spec
-        if new_pod_spec:
-            self.cluster.queue_pod(new_pod_spec, node_spec)
+        # new_pod_spec = self.stress_gen.create_pod(self.time)
+        # node_spec = self.cluster.nodes[0].spec
+        # if new_pod_spec:
+        #     self.cluster.queue_pod(new_pod_spec, node_spec)
 
         # Update cluster
         self.cluster.update(self.time)
@@ -175,6 +176,9 @@ class SimKubeEnv(gym.Env):
         pending_pods = self.cluster.pending_pods
 
         if pending_pods:
+
+            pending_pod = pending_pods[0]
+
             try:
                 deploy_node = self.cluster.get_node(self.action_map[str(action)])
             except:
@@ -182,7 +186,7 @@ class SimKubeEnv(gym.Env):
             if deploy_node:
                 if self.debug:
                     print(f"(SimKubeEnv) Deploying pod to node {deploy_node.node_name}")
-                pending_pod = pending_pods[0]
+                
                 is_scheduled = self.cluster.deploy_pod(pending_pod, deploy_node, self.time)
                 if is_scheduled:
                     if self.debug:
@@ -194,24 +198,42 @@ class SimKubeEnv(gym.Env):
                 #     if self.cluster.deploy_pod(pod, deploy_node, self.time):
                 #         break
                 self.info = {
-                    'last_pod' : pending_pod,
-                    'is_scheduled' : is_scheduled
+                    'last_pod' : pending_pod, # always have values
+                    'is_scheduled' : is_scheduled # True / False
                 }
             else:
                 if self.debug:
                     print(f"(SimKubeEnv) Standby")
-        else:
+                self.info = {
+                    'last_pod' : pending_pod, # None
+                    'is_scheduled' : None # None
+                }
+        else: # No pending pods
             if self.debug:
                 print(f"(SimKubeEnv) No pending pods")
+            self.info = {
+                'last_pod' : None, # None
+                'is_scheduled' : False # False
+            }
 
         # Get reward
-        self.reward = self.get_reward(self.cluster, action, is_scheduled, self.time)
+        self.reward = self.get_reward(env_prev, self.cluster, action, self.info, self.time)
 
         # Get state
         state = self.get_state()
 
         # Get done
         self.done = self.get_done()
+
+
+        self.time += 1
+        is_scheduled = None
+        
+        new_pod_spec = self.stress_gen.create_pod(self.time)
+        node_spec = self.cluster.nodes[0].spec
+        if new_pod_spec:
+            self.cluster.queue_pod(new_pod_spec, node_spec)
+
 
         return state, self.reward, self.done, self.info
 

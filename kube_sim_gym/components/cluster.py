@@ -40,12 +40,14 @@ class Cluster:
                     print(f"(Cluster) Found node {node_name} in cluster")
                     print(f"(Cluster) Node spec: {node.spec}")
                 return node
+        return None
 
-    def queue_pod(self, pod_spec, node_spec):
-        pod = Pod(pod_spec, node_spec)
-        if self.debug:
-            print(f"(Cluster) Queuing pod {pod.pod_name}")
-        self.pending_pods.append(pod)
+    def queue_pod(self, pod_spec_li, node_spec):
+        for pod_spec in pod_spec_li:
+            pod = Pod(pod_spec, node_spec)
+            if self.debug:
+                print(f"(Cluster) Queuing pod {pod.pod_name}")
+            self.pending_pods.append(pod)
 
     def deploy_pod(self, pod, node, time):
         is_allocated = node.alloc(pod, time)

@@ -33,12 +33,14 @@ class SimStressGen:
     
     
     def create_pod(self, time): # time: sec-based time, scenario: list of jobs
+        pod_spec_li = []
         for pod_spec in self.scenario:
             if time >= int(pod_spec[1]) and pod_spec[-1] == 0:
                 pod_spec[-1] = 1
                 if self.debug:
                     print("(SimStressGen) Create pod: {}".format(pod_spec))
-                return pod_spec
+                pod_spec_li.append(pod_spec)
+        return pod_spec_li
             
         
     def reset(self):
