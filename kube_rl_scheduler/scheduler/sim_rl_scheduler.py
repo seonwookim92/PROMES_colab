@@ -50,8 +50,22 @@ class PromesPPO(BaseFeaturesExtractor):
 
         return self.net(input1, input2)
 
-policy_kwargs = dict(
+class Naive(BaseFeaturesExtractor):
+    def __init__(self, observation_space: spaces.Box, features_dim: int = 80):
+        super(Naive, self).__init__(observation_space, features_dim)
+        self.net = nn.Linear(observation_space.shape[0], features_dim).to(device)
+        self.net.eval()
+
+    def forward(self, observations: th.Tensor) -> th.Tensor:
+        return self.net(observations)
+
+policy_kwargs_promes = dict(
     features_extractor_class=PromesPPO,
+    features_extractor_kwargs=dict(features_dim=80),
+)
+
+policy_kwargs_naive = dict(
+    features_extractor_class=Naive,
     features_extractor_kwargs=dict(features_dim=80),
 )
 
@@ -113,16 +127,19 @@ class MlpExtractor(nn.Module):
 import torch
 import torch.nn as nn
 
+import torch
+import torch.nn as nn
+
 class ActorCriticPolicy(nn.Module):
 
-    def __init__(self, env, feature_dim):
+    def __init__(self, env):
         super().__init__()
 
         # Features extractor
-        self.features_extractor = PromesPPO(observation_space=env.observation_space ,features_dim=feature_dim)
+        self.features_extractor = PromesPPO(observation_space=env.observation_space ,features_dim=80)
 
         # MLP extractor
-        self.mlp_extractor = MlpExtractor(feature_dim=feature_dim, net_arch=[64, 64], activation_fn=nn.Tanh, device=device)
+        self.mlp_extractor = MlpExtractor(feature_dim=80, net_arch=[64, 64], activation_fn=nn.Tanh, device=device)
 
         # Action net
         self.action_net = nn.Linear(in_features=64, out_features=6, bias=True)
@@ -145,6 +162,40 @@ class ActorCriticPolicy(nn.Module):
         value = self.value_net(value)
 
         return action, value
+
+# class ActorCriticPolicy(nn.Module):
+
+#     def __init__(self, env, feature_dim):
+#         super().__init__()
+
+#         # Features extractor
+#         self.features_extactor = PromesPPO(observation_space=env.observation_space ,features_dim=80)
+#         # self.features_extractor = Naive(observation_space=env.observation_space ,features_dim=feature_dim)
+
+#         # MLP extractor
+#         self.mlp_extractor = MlpExtractor(feature_dim=80, net_arch=[64, 64], activation_fn=nn.Tanh, device=device)
+
+#         # Action net
+#         self.action_net = nn.Linear(in_features=64, out_features=6, bias=True)
+
+#         # Value net
+#         self.value_net = nn.Linear(in_features=64, out_features=1, bias=True)
+
+#     def forward(self, state):
+#         # Extract features
+#         features = self.features_extractor(state)
+
+#         # Extract policy and value
+#         policy = self.mlp_extractor.policy_net(features)
+#         value = self.mlp_extractor.value_net(features)
+
+#         # Get action
+#         action = self.action_net(policy)
+
+#         # Get value
+#         value = self.value_net(value)
+
+#         return action, value
     
 
 
@@ -152,9 +203,14 @@ class SimRlScheduler:
     def __init__(self, env, model_fname='ppo_1st.zip'):
         self.env = env
         self.model_name = model_fname.split('.')[0]
-        print(f"Model file name: {self.model_name}")
-        self.model_fpath = os.path.join(base_path, 'kube_rl_scheduler', 'strategies', 'model', self.model_name)
+        # print(f"Model file name: {self.model_name}")
+        if self.model_name.startswith('_'):
+            self.model_fpath = os.path.join(base_path, 'notebook', 'training', 'model', self.model_name[1:])
+        else:
+            self.model_fpath = os.path.join(base_path, 'kube_rl_scheduler', 'strategies', 'model', self.model_name)
         self.model_type = model_fname.split('_')[0]
+        if self.model_type == '':
+            self.model_type = model_fname.split('_')[1]
         self.model = None
 
         if self.model_type == 'DQN':
@@ -164,15 +220,15 @@ class SimRlScheduler:
 
         model_policy = self.model.policy
 
-        print(f"model_policy: {model_policy}")
+        # print(f"model_policy: {model_policy}")
 
         # Get the feature_dim from the model
         feature_dim = model_policy.mlp_extractor.policy_net[0].in_features
-        print("Feature dim: ", feature_dim)
+        # print("Feature dim: ", feature_dim)
 
-        self.model = ActorCriticPolicy(env, feature_dim=feature_dim)
+        self.model = ActorCriticPolicy(env)
 
-        print(f"model: {self.model}")
+        # print(f"model: {self.model}")
 
         self.model.load_state_dict(model_policy.state_dict())
         self.model.eval()
@@ -216,7 +272,7 @@ class SimRlScheduler:
                     # print(f"Excluding node {idx}")
                     scores[idx] = -1e9
 
-            print(f"Scores: {scores}")
+            # print(f"Scores: {scores}")
 
             action = np.argmax(scores)
 

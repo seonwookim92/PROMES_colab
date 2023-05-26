@@ -43,13 +43,23 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
         }
 
     # rur = mean of cpu and mem utilization of all node
-    rur_cpu = round(np.mean([util[node]["cpu"] for node in util]), 2)
-    rur_mem = round(np.mean([util[node]["mem"] for node in util]), 2)
-    rur = round((rur_cpu + rur_mem) / 2, 2)
-    if debug:
-        print(f"(Stragegy_Default) Avg CPU util: {rur_cpu}")
-        print(f"(Stragegy_Default) Avg Mem util: {rur_mem}")
-        print(f"(Stragegy_Default) Avg Util: {rur}")
+    # rur_cpu = round(np.mean([util[node]["cpu"] for node in util]), 2)
+    # rur_mem = round(np.mean([util[node]["mem"] for node in util]), 2)
+    # rur = round((rur_cpu + rur_mem) / 2, 2)
+    # if debug:
+    #     print(f"(Stragegy_Default) Avg CPU util: {rur_cpu}")
+    #     print(f"(Stragegy_Default) Avg Mem util: {rur_mem}")
+    #     print(f"(Stragegy_Default) Avg Util: {rur}")
+
+    # Simply reward if the pod is scheduled
+    if info is not None:
+        if info['is_scheduled'] == True:
+            rur = 1
+        else:
+            rur = 0
+    else:
+        rur = 0
+
 
     # rbd1 = summation of standard deviation of each resource in all nodes
     std_cpu = round(np.std([util[node]["cpu"] for node in util]), 2)
@@ -93,6 +103,6 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     # Calculate reward
     reward = w1 * rur + w2 * rbd1 + w3 * rbd2 #+ w4 * pwd
 
-    # print(f"Reward details...\n\tRUR: {rur}\n\tRBD1: {rbd1}\n\tRBD2: {rbd2}\n\tPWD: {pwd}\n==========\nSUM> {reward}")
+    print(f"Reward details...\n\tRUR: {rur}\n\tRBD1: {rbd1}\n\tRBD2: {rbd2}\n==========\nSUM> {reward}")
 
     return reward
