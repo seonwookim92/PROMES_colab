@@ -1,0 +1,1 @@
+{"last_scenario": 0, "total_steps": 50000, "model_name": "DQN", "feature_net": "Naive", "reward_file": "train_dynamic.py"}

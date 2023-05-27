@@ -56,7 +56,7 @@ policy_kwargs_naive = dict(
 
 
 class SimRlScheduler:
-    def __init__(self, env, model_fname='ppo_1st.zip'):
+    def __init__(self, env, model_fname='ppo_1st.zip', policy_kwargs=policy_kwargs_promes):
         self.env = env
         self.model_name = model_fname.split('.')[0]
         # print(f"Model file name: {self.model_name}")
@@ -69,10 +69,12 @@ class SimRlScheduler:
             self.model_type = model_fname.split('_')[1]
         self.model = None
 
-        if self.model_type == 'DQN':
-            self.model = DQN.load(self.model_fpath, env=self.env)
-        elif self.model_type == 'PPO':
-            self.model = PPO.load(self.model_fpath, env=self.env)
+        print(f"Model type: {self.model_type}")
+
+        if self.model_type.startswith('DQN'):
+            self.model = DQN.load(self.model_fpath, env=self.env, policy_kwargs=policy_kwargs)
+        elif self.model_type.startswith('PPO'):
+            self.model = PPO.load(self.model_fpath, env=self.env, policy_kwargs=policy_kwargs)
 
         self.model_policy = self.model.policy
 
@@ -119,7 +121,7 @@ class SimRlScheduler:
                     # print(f"Excluding node {idx}")
                     scores[idx] = -1e9
 
-            print(f"Scores: {scores}")
+            # print(f"Scores: {scores}")
 
             action = np.argmax(scores)
 
