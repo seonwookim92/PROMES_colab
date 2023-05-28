@@ -1,0 +1,7 @@
+{
+    "last_idx": 0,
+    "learning_steps": 50000,
+    "model_type": "PPO",
+    "reward_file": "train_dynamic.py",
+    "model_fname": "model_ppo_sm_pr_dynamic"
+}

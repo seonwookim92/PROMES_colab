@@ -72,9 +72,9 @@ class SimRlScheduler:
         print(f"Model type: {self.model_type}")
 
         if self.model_type.startswith('DQN'):
-            self.model = DQN.load(self.model_fpath, env=self.env, policy_kwargs=policy_kwargs)
+            self.model = DQN.load(self.model_fpath)
         elif self.model_type.startswith('PPO'):
-            self.model = PPO.load(self.model_fpath, env=self.env, policy_kwargs=policy_kwargs)
+            self.model = PPO.load(self.model_fpath)
 
         self.model_policy = self.model.policy
 
@@ -107,7 +107,7 @@ class SimRlScheduler:
         else:
 
             state = env.get_state()
-            state = th.tensor(state, dtype=th.float32).unsqueeze(0)
+            state = th.tensor(state, dtype=th.float32).unsqueeze(0).to(device)
 
             features = self.model_policy.extract_features(state)
 
