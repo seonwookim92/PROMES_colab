@@ -4,6 +4,8 @@ base_path = os.path.join(os.getcwd(), "..")
 print(f"Base Path: {base_path}")
 sys.path.append(base_path)
 
+import glob
+
 import stable_baselines3 as sb3
 from stable_baselines3.common.torch_layers import BaseFeaturesExtractor
 from stable_baselines3.common.logger import configure
@@ -119,6 +121,16 @@ def train_rl_model(json_tracker_fname):
     else: # Error
         print(f"Model file does not exist: {model_fname}")
         return
+    
+    # If last_idx is not -1 and there's a model trained in training/model, then load the model
+    if last_idx != -1 and glob.glob(f'training/model/{model_fname}_*'):
+        # Load the model with the latest date
+        model_fpaths = glob.glob(f'training/model/{model_fname}_*')
+        model_fpaths.sort()
+        model_fpath = model_fpaths[-1]
+        print(f"Loading the model from {model_fpath}")
+
+        model = model.load(model_fpath)        
     
     # Save the model, append _{date} to the model name
     trained_model_fname = f'{model_fname}_{date}'
