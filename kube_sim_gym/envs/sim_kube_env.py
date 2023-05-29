@@ -61,30 +61,44 @@ class SimKubeEnv(gym.Env):
 
         new_env = SimKubeEnvCopy(self.reward_file, self.scenario_file, self.n_node, self.cpu_pool, self.mem_pool, self.debug)
         new_env.cluster = deepcopy(self.cluster)
+        new_env.time = self.time
 
         return new_env
-
 
     def random_state_gen(self):
         """
         This is a extra function to generate random state for data generation.\n
         Do not use it in normal situation, it will screw up the cluster.
         """
-        no_pod_thres = 0.8
-        no_pod_prob = np.random.random()
+        no_pod_thres = 0.15
+        full_pod_thres = 0.3
+
+        prob = np.random.random()
         # Randomly generate state
         # Node state can be in range 0 to 1 (rounded to 2 decimal places)
         cpu_pool = self.cluster.nodes[0].spec['cpu_pool']
         mem_pool = self.cluster.nodes[0].spec['mem_pool']
 
         state = []
-        for node in self.cluster.nodes:
-            node_cpu_ratio = round(np.random.uniform(0, 1), 2)
-            node_mem_ratio = round(np.random.uniform(0, 1), 2)
-            state += [node_cpu_ratio, node_mem_ratio]
+        if prob > full_pod_thres:
+            for node in self.cluster.nodes:
+                node_cpu_ratio = round(np.random.uniform(0.01, 1), 2)
+                node_mem_ratio = round(np.random.uniform(0.01, 1), 2)
+                state += [node_cpu_ratio, node_mem_ratio]
+        elif prob > no_pod_thres and prob <= full_pod_thres:
+            for node in self.cluster.nodes:
+                node_cpu_ratio = round(np.random.uniform(0.7, 1), 2)
+                node_mem_ratio = round(np.random.uniform(0.7, 1), 2)
+                state += [node_cpu_ratio, node_mem_ratio]
+        else:
+            for node in self.cluster.nodes:
+                node_cpu_ratio = round(np.random.uniform(0.01, 1), 2)
+                node_mem_ratio = round(np.random.uniform(0.01, 1), 2)
+                state += [node_cpu_ratio, node_mem_ratio]
+
 
         # Pending pod state can be in range 0 to 1 (rounded to 2 decimal places)
-        if no_pod_prob < no_pod_thres:
+        if prob > no_pod_thres:
             pending_pod_cpu_ratio = round(np.random.uniform(0, 0.5), 2)
             pending_pod_mem_ratio = round(np.random.uniform(0, 0.5), 2)
             state += [pending_pod_cpu_ratio, pending_pod_mem_ratio]
@@ -95,6 +109,7 @@ class SimKubeEnv(gym.Env):
         self.reset()
 
         for i in range(self.n_node):
+            # print(state)
             self.cluster.nodes[i].status['cpu_ratio'] = state[i * 2]
             self.cluster.nodes[i].status['mem_ratio'] = state[i * 2 + 1]
             self.cluster.nodes[i].status['cpu_util'] = state[i * 2] * cpu_pool
@@ -102,13 +117,16 @@ class SimKubeEnv(gym.Env):
 
         self.cluster.pending_pods = []
 
-        if no_pod_prob < no_pod_thres:
-            cpu_quota = state[self.n_node * 2] # * cpu_pool
-            mem_quota = state[self.n_node * 2 + 1] # * mem_pool
+        if prob > no_pod_thres:
+            cpu_quota = state[-2] # * cpu_pool
+            mem_quota = state[-1] # * mem_pool
 
-            pod = Pod([0, 0, 0, cpu_quota, mem_quota], {"cpu_pool":cpu_pool, "mem_pool":mem_pool}, self.debug)
+            pod = Pod([18, 0, 5, cpu_quota, mem_quota], {"cpu_pool":cpu_pool, "mem_pool":mem_pool}, self.debug)
+            pod.spec["cpu_ratio"] = state[-2]
+            pod.spec["mem_ratio"] = state[-1]
 
             self.cluster.pending_pods.append(pod)
+        
 
         return np.array(state, dtype=np.float32)
 
@@ -213,7 +231,7 @@ class SimKubeEnv(gym.Env):
                 print(f"(SimKubeEnv) No pending pods")
             self.info = {
                 'last_pod' : None, # None
-                'is_scheduled' : False # False
+                'is_scheduled' : None
             }
 
         # Get reward

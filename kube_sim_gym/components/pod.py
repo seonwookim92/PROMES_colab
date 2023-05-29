@@ -14,14 +14,18 @@ class Pod:
         self.node_cpu_pool = node_spec["cpu_pool"]
         self.node_mem_pool = node_spec["mem_pool"]
 
-        cpu_req = round(float(pod_spec[3]) * 5000, 0)
-        mem_req = round(float(pod_spec[4]) * 5000, 0)
+        # cpu_req = round(float(pod_spec[3]) * 5000, 0)
+        # mem_req = round(float(pod_spec[4]) * 5000, 0)
+        cpu_ratio = float(pod_spec[3])
+        mem_ratio = float(pod_spec[4])
+        cpu_req = round(cpu_ratio * self.node_cpu_pool, 0)
+        mem_req = round(mem_ratio * self.node_mem_pool, 0)
 
         self.spec = {
             "cpu_req": cpu_req,
             "mem_req": mem_req,
-            "cpu_ratio" : round(cpu_req / self.node_cpu_pool, 2),
-            "mem_ratio" : round(mem_req / self.node_mem_pool, 2),
+            "cpu_ratio" : cpu_ratio,
+            "mem_ratio" : mem_ratio,
             "duration": int(pod_spec[2]),
             "arrival_time": int(pod_spec[1])
         }

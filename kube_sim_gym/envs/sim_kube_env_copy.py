@@ -50,9 +50,26 @@ class SimKubeEnvCopy(gym.Env):
         reward_module_path = os.path.join(f"kube_{self.scheduler_type}_scheduler", "strategies", "reward", self.reward_fn_name).replace('/', '.')
         self.reward_fn = importlib.import_module(reward_module_path)
 
+    def duplicate(self):
+        # Copy the class ifself, but should be separated from the original one
+        # This is to prevent the original one from being modified
+        from copy import deepcopy
+
+        new_env = SimKubeEnvCopy(self.reward_file, self.scenario_file, self.n_node, self.cpu_pool, self.mem_pool, self.debug)
+        new_env.cluster = deepcopy(self.cluster)
+        new_env.time = self.time
+
+        return new_env
+
     def get_reward(self, cluster, action, info, time):
 
         reward = self.reward_fn.reward_helper(cluster, action, info, time, self.debug)
+
+        return reward
+    
+    def get_real_reward(self, env_prev, cluster, action, info, time):
+
+        reward = self.reward_fn.get_reward(env_prev, cluster, action, info, time, self.debug)
 
         return reward
 
@@ -86,7 +103,10 @@ class SimKubeEnvCopy(gym.Env):
             self.done = False
         return self.done
 
-    def step(self, action):
+    def step(self, action, datagen=False):
+
+        env_prev = self.duplicate()
+
         self.time += 1
         is_scheduled = None
         
@@ -142,15 +162,26 @@ class SimKubeEnvCopy(gym.Env):
                     'is_scheduled' : None # None
                 }
         else:
-            if self.debug:
-                print(f"(SimKubeEnv) No pending pods")
-            self.info = {
-                'last_pod' : None, # None
-                'is_scheduled' : False # False
-            }
+            if action == 0:
+                if self.debug:
+                    print(f"(SimKubeEnv) No pending pods")
+                self.info = {
+                    'last_pod' : None, # None
+                    'is_scheduled' : None # False
+                }
+            else:
+                if self.debug:
+                    print(f"(SimKubeEnv) 헛발질")
+                self.info = {
+                    'last_pod' : None, # None
+                    'is_scheduled' : False # None
+                }
 
         # Get reward
-        self.reward = self.get_reward(self.cluster, action, self.info, self.time)
+        if not datagen:
+            self.reward = self.get_reward(self.cluster, action, self.info, self.time)
+        else:
+            self.reward = self.get_real_reward(env_prev, self.cluster, action, self.info, self.time)
 
         # Get state
         state = self.get_state()

@@ -39,6 +39,7 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     default_cluster = env_prev.cluster
     default_time = time
 
+
     reward, rbd1, rbd2, prg = reward_helper(cluster, action, info, time, debug)
     d_reward, d_rbd1, d_rbd2, d_prg = reward_helper(default_cluster, default_action, default_info, default_time, debug)
 
@@ -48,18 +49,40 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     f_rbd2 = d_rbd2 - rbd2
     f_prg = prg - d_prg
 
+    f_rbd1 = round(f_rbd1, 4)
+    f_rbd2 = round(f_rbd2, 4)
+    f_prg = round(f_prg, 4)
+
     # reward = reward - d_reward + f_prg
     reward = w1 * f_rbd1 + w2 * f_rbd2 + w3 * f_prg
 
     # If it does as good as default scheduler, give 0.1 for each factor
-    if f_rbd1 == 0 and f_rbd2 == 0 and f_prg == 0:
+    if info['is_scheduled'] == False:
+        # print(0)
+        reward = -1.0
+    elif f_rbd1 == 0 and f_rbd2 == 0 and f_prg == 0:
+        # print(1)
         reward = 0.5
     # Or if it outperforms default scheduler, give 0.5 for each factor
     elif f_rbd1 > 0 and f_rbd2 > 0 and f_prg >= 0:
+        # print(2)
         reward = 1.0
     # If reward is too low (less than 0.01), then multiply it by 10
-    elif reward < 0.01:
+    elif (reward < 0.01 and reward > 0) or (reward > -0.01 and reward < 0) :
+        # print(3)
         reward *= 10
+    elif f_prg < 0: # If it does worse than default scheduler, give 0.1 for each factor
+        # print(4)
+        reward = -0.5
+    elif reward > 1:
+        # print(5)
+        reward = 1.0
+    elif reward < -1:
+        # print(6)
+        reward = -1.0
+    else:
+        # print(7)
+        reward = round(reward, 4)
 
     # print(f"Reward details: rbd1({f_rbd1}: {d_rbd1} - {rbd1}), rbd2({f_rbd2}: {d_rbd2} - {rbd2}), prg({f_prg}: {prg} - {d_prg})")
     # print(f"Reward is {reward}")

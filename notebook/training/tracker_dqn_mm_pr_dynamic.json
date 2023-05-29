@@ -1,7 +1,1 @@
-{
-    "last_idx": 0,
-    "learning_steps": 50000,
-    "model_type": "DQN",
-    "reward_file": "train_dynamic.py",
-    "model_fname": "model_dqn_mm_pr_dynamic"
-}
+{"last_idx": -1, "learning_steps": 50000, "model_type": "DQN", "reward_file": "train_dynamic.py", "model_fname": "model_dqn_mm_pr_dynamic"}

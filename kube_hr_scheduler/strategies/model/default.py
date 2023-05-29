@@ -27,6 +27,7 @@ class Model:
         return confidence
 
     def get_available_actions(self, env):
+
         if not env.cluster.pending_pods:
             return [0]
 
