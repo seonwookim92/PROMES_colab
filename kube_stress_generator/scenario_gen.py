@@ -5,8 +5,8 @@ import os
 base_path = os.path.join(os.path.dirname(__file__), "..")
 
 # Parameters
-STRESS_LEVEL_MAX = 5 # Maximum stress level
-STRESS_DURATION_MAX = 5 # minutes
+STRESS_LEVEL_MAX = 10 # Maximum stress level
+STRESS_DURATION_MAX = 3 # minutes
 STRESS_TYPE = ["cpu", "vm"] # Stress types to generate
 NUM_JOBS = 1000 # Number of jobs to generate
 RUN_TIME = 10 # minutes
@@ -30,9 +30,10 @@ for i in range(NUM_JOBS):
     # start_time = random.randint(0, RUN_TIME * 60)
     start_time = random.randint(0, RUN_TIME * 60)
     duration = random.randint(1, STRESS_DURATION_MAX)
-    cpu = round(random.randint(1, STRESS_LEVEL_MAX)  * 0.1, 2)
-    mem = round(random.randint(1, STRESS_LEVEL_MAX)  * 0.1, 2)
-    
+    # Randomly generate between 0.01 to STRESS_LEVEL_MAX * 0.01
+    cpu = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
+    mem = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
+
     # scenario.append([stress_type, stress_level, duration, start_time])
     scenario.append([start_time, duration, cpu, mem])
 
