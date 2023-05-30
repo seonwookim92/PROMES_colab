@@ -227,12 +227,20 @@ class SimKubeEnv(gym.Env):
                     'is_scheduled' : None # None
                 }
         else: # No pending pods
-            if self.debug:
-                print(f"(SimKubeEnv) No pending pods")
-            self.info = {
-                'last_pod' : None, # None
-                'is_scheduled' : None
-            }
+            if action == 0:
+                if self.debug:
+                    print(f"(SimKubeEnv) No pending pods")
+                self.info = {
+                    'last_pod' : None, # None
+                    'is_scheduled' : None # False
+                }
+            else:
+                if self.debug:
+                    print(f"(SimKubeEnv) 헛발질")
+                self.info = {
+                    'last_pod' : None, # None
+                    'is_scheduled' : False # None
+                }
 
         # Get reward
         self.reward = self.get_reward(env_prev, self.cluster, action, self.info, self.time)

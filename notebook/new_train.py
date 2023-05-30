@@ -58,6 +58,12 @@ def test_rl_model(scenario_file, rl_model):
             step2 += 1
             acc_rew2 += reward2
 
+        # If any of the env is done and 2000 steps have passed, stop the other
+        if step1 - step2 >= 2000 and not done1 and done2:
+            done1 = True
+        if step2 - step1 >= 2000 and not done2 and done1:
+            done2 = True
+
     acc_rew1 = round(acc_rew1, 2)
     acc_rew2 = round(acc_rew2, 2)
 
