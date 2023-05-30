@@ -30,6 +30,7 @@ def test_rl_model(scenario_file, rl_model, reward_file):
 
     # RL Scheduler
     rl_model.set_env(test_env1)
+    rl_model.policy.to(device)
 
     # Default Scheduler
     from kube_hr_scheduler.scheduler.sim_hr_scheduler import SimHrScheduler
@@ -158,9 +159,9 @@ def train_rl_model(json_tracker_fname):
         print(f"Training with {current_idx}th trace")
 
         # Test the model first
-        a1, a2, a3, a4 = test_rl_model('scenario-5l-5m-1000p-10m_unbalanced.csv', model)
-        b1, b2, b3, b4 = test_rl_model('scenario-10l-3m-1000p-10m_unbalanced.csv', model)
-        c1, c2, c3, c4 = test_rl_model('scenario-3l-10m-1000p-10m_unbalanced.csv', model)
+        a1, a2, a3, a4 = test_rl_model('scenario-5l-5m-1000p-10m_unbalanced.csv', model, reward_file)
+        b1, b2, b3, b4 = test_rl_model('scenario-10l-3m-1000p-10m_unbalanced.csv', model, reward_file)
+        c1, c2, c3, c4 = test_rl_model('scenario-3l-10m-1000p-10m_unbalanced.csv', model, reward_file)
 
         with open(f'training/log/{log_name}/test_result.txt', 'a') as f:
             f.write(f"{current_idx},{a1},{a2},{a3},{a4},{b1},{b2},{b3},{b4},{c1},{c2},{c3},{c4}\n")
