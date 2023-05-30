@@ -30,7 +30,6 @@ def test_rl_model(scenario_file, rl_model, reward_file):
 
     # RL Scheduler
     rl_model.set_env(test_env1)
-    rl_model.policy.to(device)
 
     # Default Scheduler
     from kube_hr_scheduler.scheduler.sim_hr_scheduler import SimHrScheduler
@@ -50,13 +49,8 @@ def test_rl_model(scenario_file, rl_model, reward_file):
     print(f"Testing with {scenario_file} (my model vs. default)")
     while not done1 or not done2:
 
-        # Move to device
-        obs1 = torch.from_numpy(obs1).float().to(device)
-        obs2 = torch.from_numpy(obs2).float().to(device)
-
         if not done1:
             action1, _ = rl_model.predict(obs1)
-            # action1 = rl_scheduler.decision(test_env1)
             obs1, reward1, done1, _ = test_env1.step(action1)
             step1 += 1
             acc_rew1 += reward1
