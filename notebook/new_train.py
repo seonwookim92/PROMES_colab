@@ -21,6 +21,8 @@ import torch.nn.functional as F
 
 from kube_sim_gym.envs import *
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 def test_rl_model(scenario_file, rl_model, reward_file):
 
     test_env1 = gym.make('SimKubeEnv-v0', reward_file=reward_file, scenario_file=scenario_file)
@@ -46,6 +48,11 @@ def test_rl_model(scenario_file, rl_model, reward_file):
 
     print(f"Testing with {scenario_file} (my model vs. default)")
     while not done1 or not done2:
+
+        # Move to device
+        obs1 = torch.from_numpy(obs1).float().to(device)
+        obs2 = torch.from_numpy(obs2).float().to(device)
+
         if not done1:
             action1, _ = rl_model.predict(obs1)
             # action1 = rl_scheduler.decision(test_env1)
