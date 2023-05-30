@@ -1,0 +1,1 @@
+{"last_idx": -1, "learning_steps": 70000, "model_type": "DQN", "reward_file": "train_dynamic2.py", "model_fname": "model_dqn_tm_ut_dynamic"}
