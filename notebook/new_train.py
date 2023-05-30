@@ -21,10 +21,10 @@ import torch.nn.functional as F
 
 from kube_sim_gym.envs import *
 
-def test_rl_model(scenario_file, rl_model):
+def test_rl_model(scenario_file, rl_model, reward_file):
 
-    test_env1 = gym.make('SimKubeEnv-v0', reward_file='train_dynamic.py', scenario_file=scenario_file)
-    test_env2 = gym.make('SimKubeEnv-v0', reward_file='train_dynamic.py', scenario_file=scenario_file)
+    test_env1 = gym.make('SimKubeEnv-v0', reward_file=reward_file, scenario_file=scenario_file)
+    test_env2 = gym.make('SimKubeEnv-v0', reward_file=reward_file, scenario_file=scenario_file)
 
     # RL Scheduler
     rl_model.set_env(test_env1)
@@ -78,7 +78,8 @@ from notebook.net_arch import *
 
 def train_rl_model(json_tracker_fname):
 
-    date = datetime(1992, 7, 5, 8, 33)
+    # Current date time
+    date = datetime.now()
     date = date.strftime("%m%d%Y%H%M")
 
     log_name = json_tracker_fname.split('.')[0]
