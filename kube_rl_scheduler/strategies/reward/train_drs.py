@@ -55,6 +55,7 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     beta = 1
 
     reward = alpha * avgUtil - beta * imbalance
+    reward = round(reward, 2)
 
     print(f"Reward: {alpha} * {avgUtil} - {beta} * {imbalance} = {reward}")
 

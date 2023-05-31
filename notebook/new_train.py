@@ -84,6 +84,9 @@ def train_rl_model(json_tracker_fname):
     date = datetime.now()
     date = date.strftime("%m%d%Y%H%M")
 
+    print(f"Device : {device}")
+    print(f"Current time : {date}")
+
     log_name = json_tracker_fname.split('.')[0]
     log_path = f'training/log/{log_name}'
 

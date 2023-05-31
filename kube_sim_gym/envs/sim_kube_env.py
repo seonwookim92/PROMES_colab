@@ -70,7 +70,6 @@ class SimKubeEnv(gym.Env):
         This is a extra function to generate random state for data generation.\n
         Do not use it in normal situation, it will screw up the cluster.
         """
-        no_pod_thres = 0.15
         full_pod_thres = 0.3
 
         prob = np.random.random()
@@ -85,25 +84,20 @@ class SimKubeEnv(gym.Env):
                 node_cpu_ratio = round(np.random.uniform(0.01, 1), 2)
                 node_mem_ratio = round(np.random.uniform(0.01, 1), 2)
                 state += [node_cpu_ratio, node_mem_ratio]
-        elif prob > no_pod_thres and prob <= full_pod_thres:
+        else:
             for node in self.cluster.nodes:
                 node_cpu_ratio = round(np.random.uniform(0.7, 1), 2)
                 node_mem_ratio = round(np.random.uniform(0.7, 1), 2)
                 state += [node_cpu_ratio, node_mem_ratio]
-        else:
-            for node in self.cluster.nodes:
-                node_cpu_ratio = round(np.random.uniform(0.01, 1), 2)
-                node_mem_ratio = round(np.random.uniform(0.01, 1), 2)
-                state += [node_cpu_ratio, node_mem_ratio]
 
 
         # Pending pod state can be in range 0 to 1 (rounded to 2 decimal places)
-        if prob > no_pod_thres:
-            pending_pod_cpu_ratio = round(np.random.uniform(0, 0.5), 2)
-            pending_pod_mem_ratio = round(np.random.uniform(0, 0.5), 2)
-            state += [pending_pod_cpu_ratio, pending_pod_mem_ratio]
-        else:
-            state += [0, 0]
+        # if prob > no_pod_thres:
+        pending_pod_cpu_ratio = round(np.random.uniform(0, 0.3), 2)
+        pending_pod_mem_ratio = round(np.random.uniform(0, 0.3), 2)
+        state += [pending_pod_cpu_ratio, pending_pod_mem_ratio]
+        # else:
+        #     state += [0, 0]
         
         # Update cluster
         self.reset()
@@ -117,15 +111,15 @@ class SimKubeEnv(gym.Env):
 
         self.cluster.pending_pods = []
 
-        if prob > no_pod_thres:
-            cpu_quota = state[-2] # * cpu_pool
-            mem_quota = state[-1] # * mem_pool
+        # if prob > no_pod_thres:
+        cpu_quota = state[-2] # * cpu_pool
+        mem_quota = state[-1] # * mem_pool
 
-            pod = Pod([18, 0, 5, cpu_quota, mem_quota], {"cpu_pool":cpu_pool, "mem_pool":mem_pool}, self.debug)
-            pod.spec["cpu_ratio"] = state[-2]
-            pod.spec["mem_ratio"] = state[-1]
+        pod = Pod([18, 0, 5, cpu_quota, mem_quota], {"cpu_pool":cpu_pool, "mem_pool":mem_pool}, self.debug)
+        pod.spec["cpu_ratio"] = state[-2]
+        pod.spec["mem_ratio"] = state[-1]
 
-            self.cluster.pending_pods.append(pod)
+        self.cluster.pending_pods.append(pod)
         
 
         return np.array(state, dtype=np.float32)

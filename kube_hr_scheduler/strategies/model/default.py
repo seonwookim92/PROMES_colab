@@ -7,6 +7,7 @@ class Model:
 
     def predict(self, env):
         available_actions = self.get_available_actions(env)
+        # available_actions = [1, 2, 3, 4, 5]
         prioritized_actions = self.prioritize_actions(env, available_actions)
         return prioritized_actions[0]
     
@@ -65,9 +66,11 @@ class Model:
         if action == 0:
             return 0
         node = env.cluster.nodes[action-1]
-        pod = env.cluster.pending_pods[0]
-        score_cpu = (node.spec["cpu_pool"] - node.status["cpu_util"] - pod.spec["cpu_req"]) / node.spec["cpu_pool"]
-        score_mem = (node.spec["mem_pool"] - node.status["mem_util"] - pod.spec["mem_req"]) / node.spec["mem_pool"]
+        pod = env.cluster.pending_pods[0] if env.cluster.pending_pods else None
+        pod_cpu_req = pod.spec["cpu_req"] if pod else 0
+        pod_mem_req = pod.spec["mem_req"] if pod else 0
+        score_cpu = (node.spec["cpu_pool"] - node.status["cpu_util"] - pod_cpu_req) / node.spec["cpu_pool"]
+        score_mem = (node.spec["mem_pool"] - node.status["mem_util"] - pod_mem_req) / node.spec["mem_pool"]
         score1 = (score_cpu + score_mem) / 2
 
         # Score2 = (1 - abs(cpu_util - mem_util)) / 2

@@ -49,7 +49,31 @@ class SimRlScheduler:
     def decision(self, env):
 
         state = env.get_state()
+
+        # Temporary add function : If there's no available nodes or no pending pod, return action 0
+        if not env.cluster.pending_pods:
+            return 0
+        if self.get_available_nodes(env) == [0]:
+            return 0
+        
         action, _ = self.model.predict(state)
+
         action = action.item()
 
         return action
+    
+    def get_available_nodes(self, env):
+        if not env.cluster.pending_pods:
+            return [0]
+
+        pod = env.cluster.pending_pods[0]
+        ret = []
+        
+        for idx, node in enumerate(env.cluster.nodes):
+            cpu_avail = node.spec["cpu_pool"] - node.status["cpu_util"]
+            mem_avail = node.spec["mem_pool"] - node.status["mem_util"]
+            if pod.spec["cpu_req"] <= cpu_avail and pod.spec["mem_req"] <= mem_avail:
+                ret.append(idx+1)
+        if not ret:
+            ret.append(0)
+        return ret
