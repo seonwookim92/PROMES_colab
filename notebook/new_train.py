@@ -169,10 +169,6 @@ def train_rl_model(json_tracker_fname):
     # Adjust the learning rate
     model.learning_rate = learning_rate
 
-
-    
-
-
     # Set logger
     model.set_logger(logger)
 
