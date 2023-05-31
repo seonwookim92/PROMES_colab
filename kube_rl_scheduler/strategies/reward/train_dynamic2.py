@@ -106,6 +106,9 @@ def reward_helper(cluster, action, info, time, debug=False):
     w2 = 1
     w3 = 1
 
-    reward = w1 * rur - w2 * rbd1 - w3 * rbd2
+    # Time penalty
+    time_penalty = time / 3000 # Lienar penalty
+
+    reward = w1 * rur - w2 * rbd1 - w3 * rbd2 - time_penalty
 
     return reward, rur, rbd1, rbd2
