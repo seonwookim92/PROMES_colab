@@ -37,7 +37,7 @@ class SimKubeEnv(gym.Env):
         
         self.reward = 0
         self.done = False
-        self.observation_space = gym.spaces.Box(low=0, high=100, shape=(n_node * 2 + 2,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(n_node * 2 + 2,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(n_node + 1)
         # Action space as box
         # self.action_space = gym.spaces.Box(low=0, high=n_node, shape=(1,), dtype=np.float32)

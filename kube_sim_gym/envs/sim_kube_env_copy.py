@@ -35,7 +35,7 @@ class SimKubeEnvCopy(gym.Env):
         
         self.reward = 0
         self.done = False
-        self.observation_space = gym.spaces.Box(low=0, high=100, shape=(n_node * 2 + 2,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(n_node * 2 + 2,), dtype=np.float32)
         self.action_space = gym.spaces.Discrete(n_node + 1)
 
         self.action_map = {'0': 'standby'}
