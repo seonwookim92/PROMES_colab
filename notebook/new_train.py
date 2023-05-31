@@ -105,6 +105,8 @@ def train_rl_model(json_tracker_fname):
     model_type = json_tracker['model_type']
     reward_file = json_tracker['reward_file']
     model_fname = json_tracker['model_fname']
+    model_id = json_tracker['model_id']
+    learning_rate = json_tracker['learning_rate']
 
     # Environment
     envs = []
@@ -135,18 +137,41 @@ def train_rl_model(json_tracker_fname):
         return
     
     # If last_idx is not -1 and there's a model trained in training/model, then load the model
-    if last_idx != -1 and glob.glob(f'training/model/{model_fname}_*'):
-        # Load the model with the latest date
-        model_fpaths = glob.glob(f'training/model/{model_fname}_*')
-        model_fpaths.sort()
-        model_fpath = model_fpaths[-1]
-        print(f"Loading the model from {model_fpath}")
+    if model_id == -1:
+        if last_idx != -1 and glob.glob(f'training/model/{model_fname}_*'):
+            # Load the model with the latest date
+            model_fpaths = glob.glob(f'training/model/{model_fname}_*')
+            model_fpaths.sort()
+            model_fpath = model_fpaths[-1]
+            print(f"Loading the model from {model_fpath}")
 
-        model = model.load(model_fpath)        
+            model = model.load(model_fpath)        
+
+            # Save the model, append _{date} to the model name
+            trained_model_fname = f'{model_fname}_{date}'
+            trained_model_fpath = f'training/model/{trained_model_fname}'
+
+        else:
+            print(f"Training from scratch")
+
+            # Save the model, append _{date} to the model name
+            trained_model_fname = f'{model_fname}_{date}'
+            trained_model_fpath = f'training/model/{trained_model_fname}'
+    else:
+        model_fpath = f'training/model_id/{model_fname}_{model_id}'
+        print(f"Loading the model from {model_fpath}")
+        model = model.load(model_fpath)
+
+        # Save the model, append _{model_id} to the model name
+        trained_model_fname = f'{model_fname}_{model_id}'
+        trained_model_fpath = f'training/model_id/{trained_model_fname}'
+
+    # Adjust the learning rate
+    model.learning_rate = learning_rate
+
+
     
-    # Save the model, append _{date} to the model name
-    trained_model_fname = f'{model_fname}_{date}'
-    trained_model_fpath = f'training/model/{trained_model_fname}'
+
 
     # Set logger
     model.set_logger(logger)
