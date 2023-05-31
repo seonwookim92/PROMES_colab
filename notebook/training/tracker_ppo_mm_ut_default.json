@@ -1,0 +1,7 @@
+{
+    "last_idx": -1,
+    "learning_steps": 50000,
+    "model_type": "PPO",
+    "reward_file": "train_default.py",
+    "model_fname": "model_ppo_mm_ut_default"
+}

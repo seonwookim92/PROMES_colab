@@ -9,7 +9,8 @@ class Pod:
         # pod_spec: [pod_idx, start_time, duration, cpu, mem]
 
         self.pod_idx = pod_spec[0]
-        self.pod_name = f"pod-{pod_spec[0]}-{pod_spec[1]}-{pod_spec[2]}-{pod_spec[3]}-{pod_spec[4]}-{pod_spec[5]}"
+        self.pod_name = f"pod-{pod_spec[0]}-{pod_spec[1]}-{pod_spec[2]}-{pod_spec[3]}-{pod_spec[4]}"
+        # self.pod_name = f"pod-{pod_spec[0]}-{pod_spec[1]}-{pod_spec[2]}-{pod_spec[3]}-{pod_spec[4]}-{pod_spec[5]}" # 예비
 
         self.node_cpu_pool = node_spec["cpu_pool"]
         self.node_mem_pool = node_spec["mem_pool"]
@@ -28,7 +29,7 @@ class Pod:
             "mem_ratio" : mem_ratio,
             "duration": int(pod_spec[2]),
             "arrival_time": int(pod_spec[1]),
-            "pod_type": int(pod_spec[5])
+            # "pod_type": int(pod_spec[5]) # 예비
         }
 
         self.status = {

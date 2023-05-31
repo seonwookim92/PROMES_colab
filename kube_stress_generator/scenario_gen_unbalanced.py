@@ -5,8 +5,8 @@ import os
 base_path = os.path.join(os.path.dirname(__file__), "..")
 
 # Parameters
-STRESS_LEVEL_MAX = 10 # Maximum stress level
-STRESS_DURATION_MAX = 3 # minutes
+STRESS_LEVEL_MAX = 5 # Maximum stress level
+STRESS_DURATION_MAX = 5 # minutes
 NUM_JOBS = 1000 # Number of jobs to generate
 RUN_TIME = 10 # minutes
 
