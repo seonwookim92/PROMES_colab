@@ -2,12 +2,16 @@ import random
 import numpy as np
 
 class Model:
-    def __init__(self, env=None):
-        pass
+    def __init__(self, env=None, eval=False):
+        self.env = env
+        self.eval = eval
 
     def predict(self, env):
-        available_actions = self.get_available_actions(env)
-        # available_actions = [1, 2, 3, 4, 5]
+        if self.eval:
+            available_actions = [1, 2, 3, 4, 5]
+        else:
+            available_actions = self.get_available_actions(env)
+        
         prioritized_actions = self.prioritize_actions(env, available_actions)
         return prioritized_actions[0]
     

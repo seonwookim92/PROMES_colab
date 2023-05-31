@@ -33,7 +33,7 @@ def test_rl_model(scenario_file, rl_model, reward_file):
 
     # Default Scheduler
     from kube_hr_scheduler.scheduler.sim_hr_scheduler import SimHrScheduler
-    default_scheduler = SimHrScheduler(test_env2, 'default.py')
+    default_scheduler = SimHrScheduler(test_env2, 'default.py', eval=True)
 
 
     # Test the model
@@ -131,7 +131,7 @@ def train_rl_model(json_tracker_fname):
     # Load Model
     if os.path.exists(model_fpath):
         print(f"Loading the model from {model_fname}")
-        model = model.load(model_fpath)
+        model = model.load(model_fpath, learning_rate=learning_rate)
     else: # Error
         print(f"Model file does not exist: {model_fname}")
         return
@@ -145,7 +145,7 @@ def train_rl_model(json_tracker_fname):
             model_fpath = model_fpaths[-1]
             print(f"Loading the model from {model_fpath}")
 
-            model = model.load(model_fpath)        
+            model = model.load(model_fpath, learning_rate=learning_rate)        
 
             # Save the model, append _{date} to the model name
             trained_model_fname = f'{model_fname}_{date}'
@@ -160,7 +160,7 @@ def train_rl_model(json_tracker_fname):
     else:
         model_fpath = f'training/model_id/{model_fname}_{model_id}'
         print(f"Loading the model from {model_fpath}")
-        model = model.load(model_fpath)
+        model = model.load(model_fpath, learning_rate=learning_rate)
 
         # Save the model, append _{model_id} to the model name
         trained_model_fname = f'{model_fname}_{model_id}'
@@ -184,7 +184,11 @@ def train_rl_model(json_tracker_fname):
         env = envs[current_idx]
         model.set_env(env)
 
-        model.learn(total_timesteps=learning_steps, learning_rate=learning_rate)
+        # Change the learning rate
+        model.learning_rate = learning_rate
+        model.policy.learning_rate = learning_rate
+
+        model.learn(total_timesteps=learning_steps, progress_bar=True)
 
         # Save the model
         model.save(trained_model_fpath)
