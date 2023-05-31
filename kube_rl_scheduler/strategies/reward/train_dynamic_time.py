@@ -83,6 +83,12 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     else:
         # print(7)
         reward = round(reward, 4)
+    
+    # Time penalty
+    time_penalty = time / 3000 # Lienar penalty
+
+
+    reward = round(reward - time_penalty, 4)
 
     # print(f"Reward details: rbd1({f_rbd1}: {d_rbd1} - {rbd1}), rbd2({f_rbd2}: {d_rbd2} - {rbd2}), prg({f_prg}: {prg} - {d_prg})")
     # print(f"Reward is {reward}")

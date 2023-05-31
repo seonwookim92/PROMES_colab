@@ -43,7 +43,10 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     cpu_score = 1 - util[cluster.nodes[action-1].node_name]['cpu']
     mem_score = 1 - util[cluster.nodes[action-1].node_name]['mem']
 
+    # Time penalty
+    time_penalty = time / 3000 # Lienar penalty
+
     # Calculate reward
-    reward = w1 * cpu_score + w2 * mem_score
+    reward = w1 * cpu_score + w2 * mem_score - time_penalty
 
     return reward

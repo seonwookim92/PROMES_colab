@@ -166,9 +166,6 @@ def train_rl_model(json_tracker_fname):
         trained_model_fname = f'{model_fname}_{model_id}'
         trained_model_fpath = f'training/model_id/{trained_model_fname}'
 
-    # Adjust the learning rate
-    model.learning_rate = learning_rate
-
     # Set logger
     model.set_logger(logger)
 
@@ -186,7 +183,8 @@ def train_rl_model(json_tracker_fname):
 
         env = envs[current_idx]
         model.set_env(env)
-        model.learn(total_timesteps=learning_steps)
+
+        model.learn(total_timesteps=learning_steps, learning_rate=learning_rate)
 
         # Save the model
         model.save(trained_model_fpath)

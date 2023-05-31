@@ -65,6 +65,11 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
         pwd = 0
 
     reward = w1 * f_rur - w2 * f_rbd1 - w3 * f_rbd2 + pwd
+
+    # Time penalty
+    time_penalty = time / 3000 # Lienar penalty
+    reward -= time_penalty
+
     reward = round(reward, 2)
 
     # print(f"f_rur:{f_rur} / rur:{rur} / d_rur:{d_rur}")
@@ -105,6 +110,7 @@ def reward_helper(cluster, action, info, time, debug=False):
     w1 = 1
     w2 = 1
     w3 = 1
+
 
     reward = w1 * rur - w2 * rbd1 - w3 * rbd2
 
