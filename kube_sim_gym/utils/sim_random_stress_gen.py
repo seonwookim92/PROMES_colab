@@ -1,0 +1,44 @@
+# import time
+# from kubernetes import client, config
+
+import os, sys
+base_path = os.path.join(os.path.dirname(__file__), "..", "..")
+sys.path.append(base_path)
+
+import random
+
+
+# from kube_stress_generator.job_gen import JobGenerator
+# from kube_gym.utils import monitor
+
+class SimRandomStressGen:
+    def __init__(self, debug=False):
+        self.debug = debug
+
+        self.pod_idx = 0
+        self.last_quequed_time = 0
+    
+    def create_pod(self, time): # time: sec-based time, scenario: list of jobs
+
+        if random.random() < 0.15:
+            return []
+        if self.pod_idx >= 500:
+            return []
+
+        duration = random.randint(1, 3)
+        cpu = random.randint(1, 15) / 100
+        mem = random.randint(1, 15) / 100
+
+        pod_spec = [self.pod_idx, time, duration, cpu, mem, 0, 0]
+
+        self.pod_idx += 1
+        self.last_quequed_time = time
+
+        return [pod_spec]
+        
+    def reset(self):
+        self.pod_idx = 0
+        self.last_scheduled_time = 0
+
+        if self.debug:
+            print("(SimStressGen) Reset scenario: {}".format(self.scenario[:5]))

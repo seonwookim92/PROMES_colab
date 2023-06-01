@@ -11,7 +11,10 @@ class SimHrScheduler:
 
         self.model_name = model_fname.split('.')[0]
         model_path = os.path.join("kube_hr_scheduler", "strategies", "model", self.model_name).replace("/", ".")
-        self.model = importlib.import_module(model_path).Model(self.env, self.eval)
+        if self.model_name == 'default.py':
+            self.model = importlib.import_module(model_path).Model(self.env, self.eval)
+        else:
+            self.model = importlib.import_module(model_path).Model(self.env)
 
     def decision(self, env):
         action = self.model.predict(env)

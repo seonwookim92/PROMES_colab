@@ -10,6 +10,7 @@ sys.path.append(base_path)
 from kube_sim_gym.components.cluster import Cluster
 from kube_sim_gym.components.pod import Pod
 from kube_sim_gym.utils.sim_stress_gen import SimStressGen
+from kube_sim_gym.utils.sim_random_stress_gen import SimRandomStressGen
 
 # Simulate kubernetes node and pods with cpu, memory resources
 class SimKubeEnvCopy(gym.Env):
@@ -22,7 +23,11 @@ class SimKubeEnvCopy(gym.Env):
         self.reward_fn_name = os.path.splitext(self.reward_file)[0]
 
         self.scenario_file = scenario_file
-        self.stress_gen = SimStressGen(self.scenario_file, self.debug)
+        if self.scenario_file == "random":
+            self.stress_gen = SimRandomStressGen(self.debug)
+        else:
+            self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017') else scenario_file
+            self.stress_gen = SimStressGen(self.scenario_file, self.debug)
         
         self.n_node = n_node
         self.cpu_pool = cpu_pool

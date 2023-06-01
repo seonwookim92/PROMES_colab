@@ -50,13 +50,18 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     std_mem = round(np.std([util[node]["mem"] for node in util]), 2)
     rbd1 = (std_cpu ** 2 + std_mem ** 2) ** 0.5
     rbd1 = round(rbd1, 2)
+    rbd1 = 1 - rbd1
 
     # rbd2 : Resource balance in each node between cpu and mem (1: best, 0: worst)
     # The worst case should be 1 (e.g. All cpu: 1 and All mem: 0)
-    rbd2 = 0
+    rbd2_ = []
     for node in util:
-        rbd2 += abs(util[node]["cpu"] - util[node]["mem"])
-    rbd2 = round(rbd2 / len(util), 2)
+        rbd2_.append(abs(util[node]["cpu"] - util[node]["mem"]))
+    rbd2 = sum([d ** 2 for d in rbd2_]) ** 0.5
+
+
+    # rbd3 : Resource balance in each node between cpu and mem (1: best, 0: worst)
+
 
     # Calculate reward
     reward = w1 * cpu_score + w2 * mem_score

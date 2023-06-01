@@ -10,6 +10,7 @@ sys.path.append(base_path)
 from kube_sim_gym.components.cluster import Cluster
 from kube_sim_gym.components.pod import Pod
 from kube_sim_gym.utils.sim_stress_gen import SimStressGen
+from kube_sim_gym.utils.sim_random_stress_gen import SimRandomStressGen
 
 from kube_sim_gym.envs.sim_kube_env_copy import SimKubeEnvCopy
 
@@ -23,8 +24,12 @@ class SimKubeEnv(gym.Env):
         self.reward_file = reward_file
         self.reward_fn_name = os.path.splitext(self.reward_file)[0]
 
-        self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017') else scenario_file
-        self.stress_gen = SimStressGen(self.scenario_file, self.debug)
+        self.scenario_file = scenario_file
+        if self.scenario_file == "random":
+            self.stress_gen = SimRandomStressGen(self.debug)
+        else:
+            self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017') else scenario_file
+            self.stress_gen = SimStressGen(self.scenario_file, self.debug)
         
         self.n_node = n_node
         self.cpu_pool = cpu_pool
@@ -158,6 +163,9 @@ class SimKubeEnv(gym.Env):
         return np.array(state, dtype=np.float32)
     
     def get_done(self):
+        if self.scenario_file == 'random':
+            return False
+        
         len_scenario = len(self.stress_gen.scenario)
         len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
         if len_scenario == len_scheduled:

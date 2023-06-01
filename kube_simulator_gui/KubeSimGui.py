@@ -38,7 +38,7 @@ class KubeSimGui(QMainWindow, from_class):
         self.scenarios_path = glob.glob(os.path.join(base_path, 'scenarios', '*.csv'))
         self.scenarios_path += glob.glob(os.path.join(base_path, 'scenarios', 'trace2017', '*.csv'))
         self.scenarios_fname = [os.path.basename(scenario_path) for scenario_path in self.scenarios_path]
-        self.scenario_ComboBox.addItems(['Select Scenario'] + self.scenarios_fname)
+        self.scenario_ComboBox.addItems(['Select Scenario', 'random'] + self.scenarios_fname)
 
         # Fetch reward functions from {base_path}/kube_rl_scheduler/strategies/reward/
         self.reward_functions_path = glob.glob(os.path.join(base_path, 'kube_rl_scheduler', 'strategies', 'reward', '*.py'))
@@ -324,8 +324,12 @@ class KubeSimGui(QMainWindow, from_class):
         self.info_Area.setPlainText(text)
 
     def update_progressBar(self):
-        len_scenario = len(self.env.stress_gen.scenario)
-        len_scheduled = len(self.env.cluster.terminated_pods + self.env.cluster.running_pods)
+        if self.scenario == 'random':
+            len_scenario = 1000
+            len_scheduled = len(self.env.cluster.terminated_pods + self.env.cluster.running_pods)
+        else:
+            len_scenario = len(self.env.stress_gen.scenario)
+            len_scheduled = len(self.env.cluster.terminated_pods + self.env.cluster.running_pods)
         progress = int(len_scheduled / len_scenario * 100)
         self.progressBar.setValue(progress)
         self.progressBarLabel.setText(f"{str(progress)}% ({len_scheduled}/{len_scenario})")
