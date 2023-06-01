@@ -8,7 +8,8 @@ class Model:
 
     def predict(self, env):
         if self.eval:
-            available_actions = [1, 2, 3, 4, 5]
+            # available_actions = [1, 2, 3, 4, 5]
+            available_actions = self.get_available_actions(env)
         else:
             available_actions = self.get_available_actions(env)
         

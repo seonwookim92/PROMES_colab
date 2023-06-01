@@ -120,6 +120,10 @@ class SimKubeEnv(gym.Env):
         pod.spec["mem_ratio"] = state[-1]
 
         self.cluster.pending_pods.append(pod)
+
+        # Randomly generate time between 1 ~ 5000, but more frequently in the beginning of the episode (1~2000)
+        time = np.random.randint(1, 3000) if np.random.random() > 0.3 else np.random.randint(1, 5000)
+        self.time = time
         
 
         return np.array(state, dtype=np.float32)

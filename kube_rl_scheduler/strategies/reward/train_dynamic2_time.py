@@ -67,7 +67,9 @@ def get_reward(env_prev, cluster, action, info, time, debug=False):
     reward = w1 * f_rur - w2 * f_rbd1 - w3 * f_rbd2 + pwd
 
     # Time penalty
-    time_penalty = time / 3000 # Lienar penalty
+    # time_penalty = time / 5000 # Lienar penalty
+    # reward -= time_penalty
+    time_penalty = np.exp(time / 3000) - 1 # Exponential penalty
     reward -= time_penalty
 
     reward = round(reward, 2)

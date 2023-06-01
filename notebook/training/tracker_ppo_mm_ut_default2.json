@@ -1,0 +1,9 @@
+{
+    "last_idx": -1,
+    "learning_steps": 50000,
+    "model_type": "PPO",
+    "reward_file": "train_default2.py",
+    "model_fname": "model_ppo_mm_ut_default2",
+    "model_id": -1, 
+    "learning_rate": 0.00001
+}
