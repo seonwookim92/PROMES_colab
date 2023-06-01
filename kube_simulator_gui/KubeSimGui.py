@@ -333,6 +333,7 @@ class KubeSimGui(QMainWindow, from_class):
     def update_nextAction(self): 
         if not self.scheduler:
             return
+
         self.nextAction = self.scheduler.decision(self.env)
         self.nextAction_Area.setPlainText(str(self.nextAction))
 
