@@ -22,7 +22,7 @@ class SimRandomStressGen:
 
         if random.random() < 0.15:
             return []
-        if self.pod_idx >= 500:
+        if self.pod_idx >= 1000:
             return []
 
         duration = random.randint(1, 3)

@@ -171,7 +171,7 @@ def train_rl_model(json_tracker_fname):
 
     # Train the model
     while current_idx < 20: # Target training steps (Can be changed!)
-        print(f"Training with {current_idx}th trace")
+        print(f"******* Training with {current_idx}th trace *******")
 
         # Test the model first
         a1, a2, a3, a4 = test_rl_model('scenario-5l-5m-1000p-10m_unbalanced.csv', model, reward_file)

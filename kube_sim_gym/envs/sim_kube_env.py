@@ -28,7 +28,7 @@ class SimKubeEnv(gym.Env):
         if self.scenario_file == "random":
             self.stress_gen = SimRandomStressGen(self.debug)
         else:
-            self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017') else scenario_file
+            self.scenario_file = os.path.join('trace2017', scenario_file) if scenario_file.startswith('trace2017_') else scenario_file
             self.stress_gen = SimStressGen(self.scenario_file, self.debug)
         
         self.n_node = n_node
@@ -58,6 +58,19 @@ class SimKubeEnv(gym.Env):
 
         reward_module_path = os.path.join(f"kube_{self.scheduler_type}_scheduler", "strategies", "reward", self.reward_fn_name).replace('/', '.')
         self.reward_fn = importlib.import_module(reward_module_path)
+
+        self.last_cluster_state = {
+            "nodes": {
+                1 : [1.0, 1.0],
+                2 : [1.0, 1.0],
+                3 : [1.0, 1.0],
+                4 : [1.0, 1.0],
+                5 : [1.0, 1.0]
+            },
+            "pods": {
+                1 : [0.0, 0.0],
+            }
+        }
 
     def duplicate(self):
         # Copy the class ifself, but should be separated from the original one
@@ -132,8 +145,21 @@ class SimKubeEnv(gym.Env):
         
 
         return np.array(state, dtype=np.float32)
-
-
+    
+    def update_last_cluster_state(self):
+        raw_state = self.get_state()
+        self.last_cluster_state = {
+            "nodes": {
+                1 : [raw_state[0], raw_state[1]],
+                2 : [raw_state[2], raw_state[3]],
+                3 : [raw_state[4], raw_state[5]],
+                4 : [raw_state[6], raw_state[7]],
+                5 : [raw_state[8], raw_state[9]]
+            },
+            "pods": {
+                1 : [raw_state[10], raw_state[11]],
+            }
+        }
 
     def get_reward(self, env_prev, cluster, action, info, time):
 
@@ -146,7 +172,7 @@ class SimKubeEnv(gym.Env):
         for node in self.cluster.nodes:
             node_cpu_ratio = node.get_node_rsrc_ratio()[0]
             node_mem_ratio = node.get_node_rsrc_ratio()[1]
-            node_state += [node_cpu_ratio, node_mem_ratio]
+            node_state += [1 - node_cpu_ratio, 1 - node_mem_ratio]
 
         if  self.cluster.pending_pods:
             pending_pod = self.cluster.pending_pods[0]
@@ -164,10 +190,11 @@ class SimKubeEnv(gym.Env):
     
     def get_done(self):
         if self.scenario_file == 'random':
-            return False
-        
-        len_scenario = len(self.stress_gen.scenario)
-        len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
+            len_scenario = 1000
+            len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
+        else:
+            len_scenario = len(self.stress_gen.scenario)
+            len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
         if len_scenario == len_scheduled:
             self.done = True
         else:
@@ -176,15 +203,13 @@ class SimKubeEnv(gym.Env):
 
     def step(self, action):
 
-        env_prev = self.duplicate()
+        if self.reward_file.find('dynamic') != -1:
+            env_prev = self.duplicate()
+        else:
+            env_prev = self
 
-        # self.time += 1
-        # is_scheduled = None
-        
-        # new_pod_spec = self.stress_gen.create_pod(self.time)
-        # node_spec = self.cluster.nodes[0].spec
-        # if new_pod_spec:
-        #     self.cluster.queue_pod(new_pod_spec, node_spec)
+        # Update last cluster state
+        self.update_last_cluster_state()
 
         # Update cluster
         self.cluster.update(self.time)
