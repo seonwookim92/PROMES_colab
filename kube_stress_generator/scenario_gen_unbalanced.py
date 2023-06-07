@@ -7,8 +7,8 @@ base_path = os.path.join(os.path.dirname(__file__), "..")
 # Parameters
 STRESS_LEVEL_MAX = 5 # Maximum stress level
 STRESS_DURATION_MAX = 5 # minutes
-NUM_JOBS = 1000 # Number of jobs to generate
-RUN_TIME = 10 # minutes
+NUM_JOBS = 10000 # Number of jobs to generate
+RUN_TIME = 60 # minutes
 
 
 import time, datetime
@@ -30,12 +30,15 @@ for i in range(NUM_JOBS):
     # Make cpu and mem resource quota unbalanced
     # If either cpu or mem has high stress level, the other will have low stress level
     random_prob = random.random()
-    if random_prob < 0.5: # cpu has high stress level
-        cpu = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.02), 2)
+    if random_prob < 0.4: # cpu has high stress level
+        cpu = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.03), 2)
         mem = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
-    else: # mem has high stress level
+    elif random_prob < 0.8:
         cpu = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
-        mem = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.02), 2)
+        mem = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.03), 2)
+    else:
+        cpu = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
+        mem = round(random.uniform(0.01, STRESS_LEVEL_MAX * 0.01), 2)
     
     # scenario.append([stress_type, stress_level, duration, start_time])
     scenario.append([start_time, duration, cpu, mem])

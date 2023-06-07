@@ -17,4 +17,13 @@ def get_reward(env, cluster, action, is_scheduled, time, debug=False):
     avg_mem = round(np.mean([util[node]["mem"] for node in util]), 2)
     avg_util = round((avg_cpu + avg_mem) / 2, 2)
 
-    return avg_util
+    reward = avg_util
+
+    # if not reward:
+    #     reward = 0
+
+    # # Extra statement to get average reward
+    # prev_acc_reward = env.acc_reward * env.time
+    # reward = (prev_acc_reward + avg_util) / (env.time + 1)
+
+    return reward

@@ -1,1 +1,3 @@
 ssh-add --apple-use-keychain ~/.ssh/seonwookim92_github
+
+exploration_initial_eps = 0.05, exploration_final_eps = 0.05

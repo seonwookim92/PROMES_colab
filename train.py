@@ -2,12 +2,14 @@ import os, sys
 base_path = os.path.join(os.path.dirname(__file__))
 sys.path.append(base_path)
 
+import gym
 import glob
 import importlib
 from tabulate import tabulate
 
 from kube_rl_scheduler.scheduler.sim_rl_scheduler import SimRlScheduler
 from kube_sim_gym.envs.sim_kube_env import SimKubeEnv
+from stable_baselines3.common.logger import configure
 
 if __name__ == "__main__":
 
@@ -123,7 +125,6 @@ if __name__ == "__main__":
         else:
             model = model('MlpPolicy', env=env, verbose=1)
 
-
         # Train steps
         train_steps = int(input("Train steps(ex. 100000): "))
 
@@ -134,6 +135,17 @@ if __name__ == "__main__":
         print(f"Scenario: {scenario_fname}")
         print(f"Train steps: {train_steps}")
         print()
+
+        save_fname = input(f"Save model name (default: {model_name}_{reward_fname.split('.')[0]}_{train_steps}): ")
+        log_name = f"log_{save_fname}"
+        log_path = f'notebook/training/log/{log_name}'
+        logger = configure(log_path, ['stdout', 'csv', 'tensorboard'])
+        model.set_logger(logger)
+
+        from stable_baselines3.common.callbacks import EvalCallback
+        eval_env = gym.make("SimKubeEnv-v0", reward_file='eval_rbd1.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
+        eval_callback = EvalCallback(eval_env, eval_freq=20000, n_eval_episodes=2, deterministic=True, render=False, log_path=log_path)
+
         start_training = input(f"Start training? (y/n): ")
         if start_training == "y":
             model.learn(total_timesteps=train_steps)

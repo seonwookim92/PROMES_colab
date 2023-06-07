@@ -136,6 +136,8 @@ class SimKubeEnvCopy(gym.Env):
             len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
         if len_scenario == len_scheduled:
             self.done = True
+        elif self.time - len_scenario > 3000:
+            self.done = False
         else:
             self.done = False
         return self.done

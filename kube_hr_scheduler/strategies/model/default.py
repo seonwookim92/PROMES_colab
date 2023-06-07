@@ -19,7 +19,7 @@ class Model:
     def get_confidence(self, env):
         score = {}
         # If there is no pending pod, the confidence for action 0 is 1
-        if not env.cluster.pending_pods:
+        if env.cluster.pending_pods == []:
             score[0] = 1
             for idx, action in enumerate([1, 2, 3, 4, 5]):
                 score[action] = 0
@@ -34,7 +34,7 @@ class Model:
 
     def get_available_actions(self, env):
 
-        if not env.cluster.pending_pods:
+        if env.cluster.pending_pods == []:
             return [0]
 
         pod = env.cluster.pending_pods[0]

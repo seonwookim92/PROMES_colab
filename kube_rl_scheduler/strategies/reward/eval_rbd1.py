@@ -24,4 +24,13 @@ def get_reward(env, cluster, action, is_scheduled, time, debug=False):
     rbd1 = round(rbd1 / len(util), 2)
     rbd1 = 1 - rbd1
 
-    return rbd1
+    reward = rbd1
+
+    # if not reward:
+    #     reward = 0
+
+    # # Extra statement to get average reward
+    # prev_acc_reward = env.acc_reward * env.time
+    # reward = (prev_acc_reward + rbd1) / (env.time + 1)
+    
+    return reward

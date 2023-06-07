@@ -29,4 +29,13 @@ def get_reward(env, cluster, action, is_scheduled, time, debug=False):
     rbd2 = round((rbd2_cpu + rbd2_mem) / 2, 2)
     rbd2 = 1 - rbd2
 
-    return rbd2
+    reward = rbd2
+
+    # if not reward:
+    #     reward = 0
+
+    # # Extra statement to get average reward
+    # prev_acc_reward = env.acc_reward * env.time
+    # reward = (prev_acc_reward + rbd2) / (env.time + 1)
+    
+    return reward

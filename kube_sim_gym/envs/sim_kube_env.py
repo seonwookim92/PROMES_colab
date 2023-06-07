@@ -16,7 +16,7 @@ from kube_sim_gym.envs.sim_kube_env_copy import SimKubeEnvCopy
 
 # Simulate kubernetes node and pods with cpu, memory resources
 class SimKubeEnv(gym.Env):
-    def __init__(self, reward_file="try.py", scenario_file="trace2017_100_1.csv", n_node=5, cpu_pool=50000, mem_pool=50000, debug=None):
+    def __init__(self, reward_file="train_step_3.py", scenario_file="random", n_node=5, cpu_pool=50000, mem_pool=50000, debug=None):
         # self.debug = True if debug == None else debug
         self.debug = False
 
@@ -197,6 +197,8 @@ class SimKubeEnv(gym.Env):
             len_scheduled = len(self.cluster.terminated_pods + self.cluster.running_pods)
         if len_scenario == len_scheduled:
             self.done = True
+        elif self.time - len_scenario > 3000:
+            self.done = False
         else:
             self.done = False
         return self.done
@@ -276,9 +278,6 @@ class SimKubeEnv(gym.Env):
         # Get reward
         self.reward = self.get_reward(env_prev, self.cluster, action, self.info, self.time)
 
-        # Get state
-        state = self.get_state()
-
         # Get done
         self.done = self.get_done()
 
@@ -290,6 +289,9 @@ class SimKubeEnv(gym.Env):
         node_spec = self.cluster.nodes[0].spec
         if new_pod_spec:
             self.cluster.queue_pod(new_pod_spec, node_spec)
+
+        # Get state
+        state = self.get_state()
 
 
         return state, self.reward, self.done, self.info

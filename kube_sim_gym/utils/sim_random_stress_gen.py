@@ -26,8 +26,13 @@ class SimRandomStressGen:
             return []
 
         duration = random.randint(1, 3)
-        cpu = random.randint(1, 15) / 100
-        mem = random.randint(1, 15) / 100
+        # Generate integer between 1 and 30, but more on the lower side
+        cpu = random.randint(1, 30) ** 2
+        mem = random.randint(1, 30) ** 2
+        cpu = random.randint(1, 30) / 100
+        mem = random.randint(1, 30) / 100
+
+        
 
         pod_spec = [self.pod_idx, time, duration, cpu, mem, 0, 0]
 
