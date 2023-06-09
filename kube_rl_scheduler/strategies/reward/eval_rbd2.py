@@ -2,6 +2,9 @@ import numpy as np
 
 def get_reward(env, cluster, action, is_scheduled, time, debug=False):
 
+    last_cluster_state = env.last_cluster_state
+    last_pod_state = last_cluster_state['pods'][1]
+
     # Resource balance in each node
 
     util = {}
@@ -12,24 +15,16 @@ def get_reward(env, cluster, action, is_scheduled, time, debug=False):
             "mem": mem_ratio
         }
 
-    # AvgUtil = mean of cpu and mem utilization of all node
-    avg_cpu = round(np.mean([util[node]["cpu"] for node in util]), 2)
-    avg_mem = round(np.mean([util[node]["mem"] for node in util]), 2)
-    avg_util = round((avg_cpu + avg_mem) / 2, 2)
+    # rbd2 : Resource Difference of the scheduled(tried) node
+    if action == 0:
+        rbd2 = 0
+    else:
+        _cpu = 1 - util[cluster.nodes[action-1].node_name]["cpu"] - last_pod_state[0]
+        _mem = 1 - util[cluster.nodes[action-1].node_name]["mem"] - last_pod_state[1]
+        rbd2 = abs(_cpu - _mem)
+        rbd2 = - round(rbd2, 2)
 
-    rbd2_cpu = 0
-    rbd2_mem = 0
-    for node in util:
-        rbd2_cpu += abs(util[node]["cpu"] - avg_cpu)
-        rbd2_mem += abs(util[node]["mem"] - avg_mem)
-
-    rbd2_cpu = round(rbd2_cpu / len(util), 2)
-    rbd2_mem = round(rbd2_mem / len(util), 2)
-
-    rbd2 = round((rbd2_cpu + rbd2_mem) / 2, 2)
-    rbd2 = 1 - rbd2
-
-    reward = rbd2
+    reward = 1 + rbd2
 
     # if not reward:
     #     reward = 0

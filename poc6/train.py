@@ -14,7 +14,7 @@ from kube_hr_scheduler.strategies.model.default import Model
 
 import gym
 import numpy as np
-from stable_baselines3 import DQN
+from stable_baselines3 import DQN, PPO
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.ppo import MlpPolicy
@@ -31,55 +31,44 @@ def init_env():
 
 def init_model(env):
     # Create model and load policy
-    model0 = DQN('MlpPolicy', env, verbose=1)
-    # model1 = DQN('MlpPolicy', env, verbose=1)
-    # model2 = DQN('MlpPolicy', env, verbose=1)
-    # model3 = DQN('MlpPolicy', env, verbose=1)
+    model = PPO('MlpPolicy', env, verbose=1)
 
-    return model0
-    # return model0, model1, model2, model3
+    return model
 
 def init_eval_env(data_rate):
     # Prepare Eval ENV & Callback
     eval_env0 = gym.make("SimKubeEnv-v0", reward_file='train_step_3.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
     eval_env1 = gym.make("SimKubeEnv-v0", reward_file='eval_rur.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
-    eval_env2 = gym.make("SimKubeEnv-v0", reward_file='eval_rbd1.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
+    eval_env2 = gym.make("SimKubeEnv-v0", reward_file='eval_rbd1.py', scenario_file='scenario-5l-5m-10000p-10m_unbalanced.csv')
     eval_env3 = gym.make("SimKubeEnv-v0", reward_file='eval_rbd2.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
     eval_env4 = gym.make("SimKubeEnv-v0", reward_file='eval_ct.py', scenario_file='scenario-5l-5m-1000p-10m_unbalanced.csv')
-
-    # eval_callback0 = EvalCallback(eval_env0, eval_freq=80000, n_eval_episodes=3, deterministic=True, render=False, log_path=f"results/{data_rate}/rew")
-    # eval_callback1 = EvalCallback(eval_env1, eval_freq=80000, n_eval_episodes=3, deterministic=True, render=False, log_path=f"results/{data_rate}/rur")
-    # eval_callback2 = EvalCallback(eval_env2, eval_freq=80000, n_eval_episodes=3, deterministic=True, render=False, log_path=f"results/{data_rate}/rbd1")
-    # eval_callback3 = EvalCallback(eval_env3, eval_freq=80000, n_eval_episodes=3, deterministic=True, render=False, log_path=f"results/{data_rate}/rbd2")
-
-    # return eval_callback0, eval_callback1, eval_callback2, eval_callback3
 
     return [eval_env0, eval_env1, eval_env2, eval_env3, eval_env4]
 
 def eval_model(model, eval_envs):
     ret = []
     print('Evaluation : train_step_3')
-    mean_reward, std_reward = evaluate_policy(model, eval_envs[0], n_eval_episodes=3, deterministic=True)
+    mean_reward, std_reward = evaluate_policy(model, eval_envs[0], n_eval_episodes=1, deterministic=True)
     print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
     ret += [mean_reward, std_reward]
 
     print('Evaluation : eval_rur')
-    mean_reward, std_reward = evaluate_policy(model, eval_envs[1], n_eval_episodes=3, deterministic=True)
+    mean_reward, std_reward = evaluate_policy(model, eval_envs[1], n_eval_episodes=1, deterministic=True)
     print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
     ret += [mean_reward, std_reward]
 
     print('Evaluation : eval_rbd1')
-    mean_reward, std_reward = evaluate_policy(model, eval_envs[2], n_eval_episodes=3, deterministic=True)
+    mean_reward, std_reward = evaluate_policy(model, eval_envs[2], n_eval_episodes=1, deterministic=True)
     print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
     ret += [mean_reward, std_reward]
 
     print('Evaluation : eval_rbd2')
-    mean_reward, std_reward = evaluate_policy(model, eval_envs[3], n_eval_episodes=3, deterministic=True)
+    mean_reward, std_reward = evaluate_policy(model, eval_envs[3], n_eval_episodes=1, deterministic=True)
     print(f"mean_reward:{mean_reward:.2f} +/- {std_reward:.2f}")
     ret += [mean_reward, std_reward]
 
     print('Episode length :')
-    mean_reward, std_reward = evaluate_policy(model, eval_envs[4], n_eval_episodes=3, deterministic=True)
+    mean_reward, std_reward = evaluate_policy(model, eval_envs[4], n_eval_episodes=1, deterministic=True)
     print(f"Episode length:{mean_reward:.2f} +/- {std_reward:.2f}")
     ret += [mean_reward, std_reward]
 
@@ -100,14 +89,15 @@ def pretrain(expert_demo, num_epochs=5):
 
     bc_trainer.train(n_epochs=num_epochs, log_interval=100000)
 
-    return bc_trainer.policy
+    return bc_trainer
 
 def load_expert_demo(path, rate):
     # Get the full length
     with open(path, 'r') as f:
         full_length = len(f.readlines())
 
-    load_length = int(full_length * rate / 100)
+    load_length = 10 ** rate
+    print(f"Num of expert demo loading: {load_length}")
 
     # Load the expert demonstration
     data = np.genfromtxt(path, delimiter=',', max_rows=load_length)
@@ -121,6 +111,17 @@ def load_expert_demo(path, rate):
     transitions = Transitions(obs, acts, infos, next_obs, dones)
 
     return transitions
+
+def log_eval(eval_log, log_path):
+    # Create the log file if it doesn't exist
+    if not os.path.exists(log_path):
+        with open(log_path, 'w') as f:
+            f.write('data_rate,train_step_3,eval_rur,eval_rbd1,eval_rbd2,episode_length\n')
+
+    # Append the log
+    with open(log_path, 'a') as f:
+        f.write(','.join(map(str, eval_log)) + '\n')
+
 
 # env = init_env()
 # model = init_model(env)
@@ -152,28 +153,31 @@ if __name__ == "__main__":
 
     # Write eval_log as csv
     with open(log_path, 'a') as f:
-        f.write(f"{eval_log[0]},{eval_log[1]},{eval_log[2]},{eval_log[3]},{eval_log[4]},{eval_log[5]},{eval_log[6]},{eval_log[7]},{eval_log[8]},{eval_log[9]}\n")
+        f.write(f"{0}, {eval_log[0]}, {eval_log[2]}, {eval_log[4]}, {eval_log[6]}, {eval_log[8]}\n")
 
     if data_rate != 0:
         print("Pretraining...")
         expert_demo = load_expert_demo(os.path.join(base_path, 'dataset', 'data_expert.csv'), data_rate)
-        policy = pretrain(expert_demo)
-        model.policy = policy
+        bc_trainer = pretrain(expert_demo)
+
+        model.policy = bc_trainer.policy
+        model.policy.train(True)
         print("Pretraining Done")
 
     print("Now it's ready to proceed!")
-    input("Press Enter to continue...")
+    # input("Press Enter to continue...")
 
     # Train the model and evaluate it every 50000 steps
     for i in range(60):
         print(f"Training {i}th iteration...")
 
         model.learn(total_timesteps=50000, log_interval=10000)
+        print(f"{i}th training done")
         eval_log = eval_model(model, eval_envs)
 
         # Write eval_log as csv
         with open(log_path, 'a') as f:
-            f.write(f"{i}, {eval_log[0]},{eval_log[1]},{eval_log[2]},{eval_log[3]},{eval_log[4]},{eval_log[5]},{eval_log[6]},{eval_log[7]},{eval_log[8]},{eval_log[9]}\n")
+            f.write(f"{i+1}, {eval_log[0]}, {eval_log[2]}, {eval_log[4]}, {eval_log[6]}, {eval_log[8]}\n")
 
     # Save the model
     model.save(f"model/static_{data_rate}")

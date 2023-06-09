@@ -198,7 +198,7 @@ class SimKubeEnv(gym.Env):
         if len_scenario == len_scheduled:
             self.done = True
         elif self.time - len_scenario > 3000:
-            self.done = False
+            self.done = True
         else:
             self.done = False
         return self.done
